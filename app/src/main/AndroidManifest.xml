@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".PetverseApplication"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PetVerse"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.PetVerse" />
+        <activity
+            android:name=".ui.screen.HomeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_home"
+            android:theme="@style/Theme.PetVerse" />
+        <activity
+            android:name=".ui.activity.ResetPassCompleteActivity"
+            android:exported="false"
+            android:label="@string/title_activity_reset_pass_complete"
+            android:theme="@style/Theme.PetVerse" />
+        <activity
+            android:name=".ui.activity.NewPasswordWlActivity"
+            android:exported="false"
+            android:label="@string/title_activity_new_password_wl"
+            android:theme="@style/Theme.PetVerse" />
+        <activity
+            android:name=".ui.activity.OtpActivity"
+            android:exported="false"
+            android:label="@string/title_activity_otp"
+            android:theme="@style/Theme.PetVerse" />
+        <activity
+            android:name=".ui.activity.ResetPassUsingEmailActivity"
+            android:exported="false"
+            android:label="@string/title_activity_reset_pass_using_email"
+            android:theme="@style/Theme.PetVerse" />
+        <activity
+            android:name=".ui.activity.SignupActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activity.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.activity.WelcomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">PetVerse</string>
+    <string name="welcome">Welcome</string>
+    <string name="intro_message">Connect with fellow pet lovers, and celebrate every tail wag and purr with a community that understands your pet\'s unique charm. From playful antics to heartwarming moments, Petverse is where your pet\'s world comes to life!</string>
+    <string name="login">Log in</string>
+    <string name="signup">Sign Up</string>
+    <string name="welcome_screen_image">tes</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="username_label">Username</string>
+    <string name="name_label">Full Name</string>
+    <string name="dont_have_account">Don’t have an account yet?</string>
+    <string name="have_account">Already have an account?</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="icon_description">Arrow forward</string>
+    <string name="title_activity_reset_pass_using_email">ResetPassUsingEmailActivity</string>
+    <string name="title_activity_otp">OtpActivity</string>
+    <string name="title_activity_new_password_wl">NewPasswordWlActivity</string>
+    <string name="title_activity_reset_pass_complete">ResetPassCompleteActivity</string>
+    <string name="title_activity_bottom_navigation_bar">BottomNavigationBar</string>
+    <string name="title_activity_camera_detection">CameraDetectionActivity</string>
+    <string name="title_activity_top_bar">TopBarActivity</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_post_card">PostCard</string>
+    <string name="title_activity_like_history">LikeHistoryActivity</string>
+    <string name="placeholder_search">Search</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_favorite">Like</string>
+    <string name="menu_profile">Proflie</string>
+    <string name="upload_post">Upload</string>
+    <string name="title_activity_upload_post">UploadPostActivity</string>
+    <string name="title_activity_upload_postt">UploadPosttActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+
+</resources>

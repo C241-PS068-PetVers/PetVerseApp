@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "303846479002",
+    "project_id": "petverse-66f7f",
+    "storage_bucket": "petverse-66f7f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303846479002:android:4f6d19f332f3b31d87bb23",
+        "android_client_info": {
+          "package_name": "com.capstone.petverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiTXdj5L9gkmiuLa10Ye31LFrmtd_sUZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
