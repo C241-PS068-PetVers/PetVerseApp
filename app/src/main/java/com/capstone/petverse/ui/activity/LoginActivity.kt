@@ -5,8 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Visibility
@@ -57,7 +59,9 @@ class LoginActivity : ComponentActivity() {
     @Composable
     fun PetverseAppLogin() {
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.systemBars),
             color = MaterialTheme.colorScheme.onPrimary
         ) {
             LoginScreen()
@@ -119,13 +123,15 @@ class LoginActivity : ComponentActivity() {
     @Composable
     fun LoginScreen(viewModel: LoginViewModel = viewModel()) {
         val loginFormState by viewModel.loginFormState.observeAsState()
+        val scrollState = rememberScrollState()
         val context = LocalContext.current
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(40.dp),
+                    .padding(40.dp)
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {

@@ -1,14 +1,15 @@
 package com.capstone.petverse.ui.activity
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Visibility
@@ -17,9 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +28,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -39,7 +39,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -66,7 +65,9 @@ class SignupActivity : ComponentActivity() {
     @Composable
     fun PetverseAppSignup(viewModel: SignupViewModel) {
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.systemBars),
             color = MaterialTheme.colorScheme.onPrimary
         ) {
             SignupScreen(viewModel)
@@ -82,6 +83,10 @@ class SignupActivity : ComponentActivity() {
         val password by viewModel.password.observeAsState("")
         val isPasswordVisible by viewModel.isPasswordVisible.observeAsState(false)
         val context = LocalContext.current
+        val scrollState = rememberScrollState()
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
 
         val addIcon = rememberAdd()
 
@@ -91,7 +96,8 @@ class SignupActivity : ComponentActivity() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(40.dp),
+                    .padding(40.dp)
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -104,7 +110,7 @@ class SignupActivity : ComponentActivity() {
                         color = colorResource(id = R.color.colorPrimary)
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                     Column(horizontalAlignment = Alignment.Start) {
                         Text(
@@ -114,7 +120,7 @@ class SignupActivity : ComponentActivity() {
                             fontFamily = interFamily,
                             color = colorResource(id = R.color.colorPrimaryDark)
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
@@ -133,7 +139,7 @@ class SignupActivity : ComponentActivity() {
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                         Text(
                             text = stringResource(R.string.username_label),
@@ -142,7 +148,7 @@ class SignupActivity : ComponentActivity() {
                             fontFamily = interFamily,
                             color = colorResource(id = R.color.colorPrimaryDark)
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
@@ -161,7 +167,7 @@ class SignupActivity : ComponentActivity() {
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                         Text(
                             text = stringResource(R.string.email_label),
@@ -171,7 +177,7 @@ class SignupActivity : ComponentActivity() {
                             color = colorResource(id = R.color.colorPrimaryDark)
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
@@ -190,7 +196,7 @@ class SignupActivity : ComponentActivity() {
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                         Text(
                             text = stringResource(R.string.password_label),
@@ -200,7 +206,7 @@ class SignupActivity : ComponentActivity() {
                             color = colorResource(id = R.color.colorPrimaryDark)
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 20.dp else 10.dp))
 
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
@@ -223,7 +229,7 @@ class SignupActivity : ComponentActivity() {
                             )
                         )
 
-                        Spacer(modifier = Modifier.height(38.dp))
+                        Spacer(modifier = Modifier.height(if (isLandscape) 30.dp else 38.dp))
 
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -261,7 +267,7 @@ class SignupActivity : ComponentActivity() {
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(70.dp))
+                            Spacer(modifier = Modifier.height(if (isLandscape) 50.dp else 70.dp))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),

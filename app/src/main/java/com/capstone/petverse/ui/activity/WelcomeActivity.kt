@@ -6,12 +6,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,7 +45,9 @@ class WelcomeActivity : ComponentActivity() {
     @Composable
     fun PetverseAppWelcome(viewModel: WelcomeViewModel) {
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.systemBars),
             color = MaterialTheme.colorScheme.onPrimary
         ) {
             WelcomeScreen(viewModel)
@@ -60,13 +65,17 @@ class WelcomeActivity : ComponentActivity() {
 
     @Composable
     fun WelcomeScreen(viewModel: WelcomeViewModel) {
+        val scrollState = rememberScrollState()
+        val isLandscape = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(40.dp),
+                    .padding(40.dp)
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -101,6 +110,8 @@ class WelcomeActivity : ComponentActivity() {
                         color = colorResource(id = R.color.colorPrimaryDark)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(if (isLandscape) 40.dp else 5.dp))
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Button(
