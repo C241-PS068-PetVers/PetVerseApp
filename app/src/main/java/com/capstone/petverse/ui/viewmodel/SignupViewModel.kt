@@ -7,22 +7,14 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.capstone.petverse.data.model.User
-import com.capstone.petverse.data.remote.apiService
+import androidx.lifecycle.viewModelScope
+import com.capstone.petverse.data.repository.UserRepository
+import com.capstone.petverse.di.Injection
 import com.capstone.petverse.ui.activity.LoginActivity
-import com.google.firebase.auth.FirebaseAuth
-//import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SignupViewModel : ViewModel() {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
+    private val userRepository: UserRepository = Injection.provideUserRepository()
 
     private val _name = MutableLiveData<String>()
     val name: LiveData<String> get() = _name
@@ -39,8 +31,6 @@ class SignupViewModel : ViewModel() {
     private val _isPasswordVisible = MutableLiveData<Boolean>()
     val isPasswordVisible: LiveData<Boolean> get() = _isPasswordVisible
 
-    private val _fullName = MutableLiveData<String>()
-    val fullName: LiveData<String> get() = _fullName
 
     init {
         _isPasswordVisible.value = false
@@ -79,161 +69,34 @@ class SignupViewModel : ViewModel() {
     }
 
     fun onSignupClicked(context: Context) {
-        val emailValue = email.value.orEmpty()
-        val passwordValue = password.value.orEmpty()
         val nameValue = name.value.orEmpty()
         val usernameValue = username.value.orEmpty()
+        val emailValue = email.value.orEmpty()
+        val passwordValue = password.value.orEmpty()
+
+        Log.e("SignupInput", "Email: $emailValue, Password: $passwordValue, Name: $nameValue, Username: $usernameValue")
 
         if (emailValue.isNotEmpty() && passwordValue.isNotEmpty()) {
-            auth.createUserWithEmailAndPassword(emailValue, passwordValue)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
+            viewModelScope.launch {
+                try {
+                    val response = userRepository.registerUser(nameValue, usernameValue, emailValue, passwordValue)
+                    if (response.isSuccessful) {
                         Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
-
-                        saveUserInfoToFirestore(nameValue, usernameValue, emailValue, passwordValue)
-
-                        _name.value = nameValue
-                        _username.value = usernameValue
-
                         navigateToLogin(context)
                     } else {
-                        Toast.makeText(context, "Sign Up Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("SignupError", "Error: $errorBody")
+                        Toast.makeText(context, "Sign Up Failed: ${response.message()} - $errorBody", Toast.LENGTH_SHORT).show()
                     }
+                } catch (e: Exception) {
+                    Log.e("SignupError", "Exception: ${e.message}")
+                    Toast.makeText(context, "Sign Up Failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
         } else {
             Toast.makeText(context, "Email and Password cannot be empty", Toast.LENGTH_SHORT).show()
         }
     }
-
-//    pakai api localhost
-//fun onSignupClicked(context: Context) {
-//    val emailValue = email.value.orEmpty()
-//    val passwordValue = password.value.orEmpty()
-//    val nameValue = name.value.orEmpty()
-//    val usernameValue = username.value.orEmpty()
-//
-//    // Check if all fields are filled
-//    if (emailValue.isNotEmpty() && passwordValue.isNotEmpty() && nameValue.isNotEmpty() && usernameValue.isNotEmpty()) {
-//        // Validate email format
-//        if (!emailValue.contains("@")) {
-//            Toast.makeText(context, "Invalid email address", Toast.LENGTH_SHORT).show()
-//            return
-//        }
-//
-//        val user = User(name = nameValue, username = usernameValue, email = emailValue, password = passwordValue)
-//
-//        CoroutineScope(Dispatchers.IO).launch {
-//            try {
-//                val response = apiService.signup(user)
-//                withContext(Dispatchers.Main) {
-//                    if (response.isSuccessful && response.body()?.success == true) {
-//                        Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
-//
-//                        saveUserInfoToFirebase(nameValue, usernameValue, emailValue, passwordValue)
-//
-//                        _name.value = nameValue
-//                        _username.value = usernameValue
-//
-//                        Log.d("SignUp", "Calling navigateToLogin")
-//                        navigateToLogin(context)
-//                    } else {
-//                        val errorBody = response.errorBody()?.string()
-//                        Log.e("Sign Up Failed", "Response: $errorBody")
-//
-//                        Toast.makeText(context, "Sign Up Failed: ${response.body()?.message ?: "Unknown error"}", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                withContext(Dispatchers.Main) {
-//                    Toast.makeText(context, "Sign Up Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-//                    Log.e("Sign Up Failed", "Exception: ${e.message}")
-//                }
-//            }
-//        }
-//    } else {
-//        Toast.makeText(context, "All fields are required", Toast.LENGTH_SHORT).show()
-//    }
-//}
-
-
-
-
-
-
-
-
-//
-
-    fun saveUserInfoToFirestore(name: String, username: String, email: String, password: String) {
-        val currentUser = auth.currentUser
-        val userId = currentUser?.uid.orEmpty()
-
-        val userInfo = hashMapOf(
-            "name" to name,
-            "username" to username,
-            "email" to email,
-            "password" to password
-        )
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                db.collection("users").document(userId).set(userInfo)
-                withContext(Dispatchers.Main) {
-                    Log.d("SaveUserInfo", "User info saved to Firestore di GCP")
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Log.e("SaveUserInfo", "Failed to save user info to Firestore di GCP: ${e.message}")
-                }
-            }
-        }
-    }
-
-
-//    pakai api localhost
-
-//    fun saveUserInfoToFirebase(name: String, username: String, email: String, password: String) {
-//        val currentUser = auth.currentUser
-//        val userId = currentUser?.uid.orEmpty()
-//
-//        val userInfo = hashMapOf(
-//            "name" to name,
-//            "username" to username,
-//            "email" to email,
-//            "password" to password
-//        )
-//
-//        db.collection("users").document(userId).set(userInfo)
-//            .addOnCompleteListener { task ->
-//                if (task.isSuccessful) {
-//                    Log.d("SaveUserInfo", "User info saved to Firestore")
-//                } else {
-//                    Log.e("SaveUserInfo", "Failed to save user info: ${task.exception?.message}")
-//                }
-//            }
-//    }
-
-
-//    fun fetchUserInfo() {
-//        val userId = auth.currentUser?.uid.orEmpty()
-//        if (userId.isNotEmpty()) {
-//            db.collection("users").document(userId).get()
-//                .addOnSuccessListener { document ->
-//                    if (document != null) {
-//                        _name.value = document.getString("name") ?: "No Name"
-//                        _username.value = document.getString("username") ?: "No Username"
-//                        Log.d("FetchUserInfo", "User data: ${document.data}")
-//                    } else {
-//                        Log.d("FetchUserInfo", "No such document")
-//                    }
-//                }
-//                .addOnFailureListener { exception ->
-//                    Log.d("FetchUserInfo", "get failed with ", exception)
-//                }
-//        } else {
-//            Log.d("FetchUserInfo", "User ID is empty")
-//        }
-//    }
 
     fun navigateToLogin(context: Context) {
         Log.d("NavigateToLogin", "Navigating to LoginActivity")

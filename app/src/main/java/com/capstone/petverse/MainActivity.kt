@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -70,6 +74,8 @@ fun PetVerseApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    var searchQuery by remember { mutableStateOf("") }
+    var searchResults by remember { mutableStateOf(dummyMenu) }
     Scaffold(
         bottomBar = { BottomBar(navController) }
     ){ innerPadding ->
@@ -78,7 +84,20 @@ fun PetVerseApp(modifier: Modifier = Modifier) {
                 .padding(innerPadding).background(Color.White)
         ) {
             if (currentRoute != Screen.Upload.route) {
-                Search()
+                Search(
+                    query = searchQuery,
+                    onQueryChange = { query ->
+                        searchQuery = query
+                        searchResults = if (query.isEmpty()) {
+                            dummyMenu
+                        } else {
+                            dummyMenu.filter {
+                                it.username.contains(query, ignoreCase = true) ||
+                                        it.description.contains(query, ignoreCase = true)
+                            }
+                        }
+                    }
+                )
             }
             NavHost(navController, startDestination = Screen.Home.route) {
                 composable(Screen.Home.route) {
@@ -92,9 +111,9 @@ fun PetVerseApp(modifier: Modifier = Modifier) {
 //                    CreatePostScreen()
 //                    UploadPosttActivity()
                 }
-//                composable(Screen.Profile.route) {
-//                    ProfileActivity(viewModel, logoutAction, deleteAccountAction)
-//                }
+                composable(Screen.Profile.route) {
+                    //
+                }
                 composable(Screen.Profile.route) {
                     val viewModel: SignupViewModel = viewModel()
                     val context = LocalContext.current
@@ -111,22 +130,7 @@ fun PetVerseApp(modifier: Modifier = Modifier) {
             }
         }
     }
-
 }
-
-//@Composable
-//fun Banner(modifier: Modifier = Modifier) {
-//    Column(modifier = modifier) {
-////        Text(
-////            text = "PetVerse Search",
-////            fontSize = 20.sp,
-////            fontWeight = FontWeight.Bold,
-////            color = Color.Black,
-////            modifier = Modifier.padding(16.dp)
-////        )
-//        Search()
-//    }
-//}
 
 @Composable
 fun BottomBar(
@@ -151,6 +155,11 @@ fun BottomBar(
                 title = stringResource(R.string.upload_post),
                 icon = Icons.Default.Upload,
                 route = "upload"
+            ),
+            BottomBarItem(
+                title = stringResource(R.string.detection),
+                icon = Icons.Default.PhotoCamera,
+                route = "detection"
             ),
             BottomBarItem(
                 title = stringResource(R.string.menu_profile),

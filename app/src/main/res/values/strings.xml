@@ -31,5 +31,6 @@
     <string name="title_activity_upload_post">UploadPostActivity</string>
     <string name="title_activity_upload_postt">UploadPosttActivity</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="detection">Detection</string>
 
 </resources>

@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 import com.capstone.petverse.ui.model.Post
 import com.capstone.petverse.ui.components.CardPost
 
-
 @Composable
 fun HomeScreen(
     listMenu: List<Post>,
