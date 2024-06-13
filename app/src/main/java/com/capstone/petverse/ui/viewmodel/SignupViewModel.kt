@@ -1,3 +1,4 @@
+// SignupViewModel.kt
 package com.capstone.petverse.ui.viewmodel
 
 import android.content.Context
@@ -9,12 +10,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.capstone.petverse.data.repository.UserRepository
-import com.capstone.petverse.di.Injection
 import com.capstone.petverse.ui.activity.LoginActivity
 import kotlinx.coroutines.launch
 
-class SignupViewModel : ViewModel() {
-    private val userRepository: UserRepository = Injection.provideUserRepository()
+class SignupViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     private val _name = MutableLiveData<String>()
     val name: LiveData<String> get() = _name
@@ -30,7 +29,6 @@ class SignupViewModel : ViewModel() {
 
     private val _isPasswordVisible = MutableLiveData<Boolean>()
     val isPasswordVisible: LiveData<Boolean> get() = _isPasswordVisible
-
 
     init {
         _isPasswordVisible.value = false

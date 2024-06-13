@@ -17,13 +17,11 @@ import com.capstone.petverse.ui.components.ui.theme.PetVerseTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Search(
-    query: String,
-    onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     SearchBar(
-        query = query,
-        onQueryChange = onQueryChange,
+        query = "",
+        onQueryChange = {},
         onSearch = {},
         active = false,
         onActiveChange = {},
@@ -49,9 +47,9 @@ fun Search(
     }
 }
 
-@Composable
-fun SearchPreview() {
-    PetVerseTheme {
-        Search(query = "", onQueryChange = {})
-    }
-}
+//@Composable
+//fun SearchPreview() {
+//    PetVerseTheme {
+//        Search(query = "", onQueryChange = {})
+//    }
+//}

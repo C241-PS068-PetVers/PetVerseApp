@@ -1,101 +1,130 @@
-import android.content.Context
-import android.content.Intent
-import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import com.capstone.petverse.ui.activity.LoginActivity
-import com.capstone.petverse.ui.viewmodel.SignupViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.capstone.petverse.R // Ensure this is correct
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileScreen() {
+    Scaffold(
+        topBar = { ProfileTopBar() },
+        content = { paddingValues ->
+            BodyContent(modifier = Modifier.padding(paddingValues))
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileTopBar() {
+    TopAppBar(
+        title = {},
+        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White),
+        actions = {
+            IconButton(onClick = { /* Settings action */ }) {
+                Icon(Icons.Filled.Settings, contentDescription = "Settings")
+            }
+        }
+    )
+}
 
 @Composable
-fun ProfileActivity(
-    viewModel: SignupViewModel,
-    logoutAction: () -> Unit,
-    deleteAccountAction: () -> Unit
-) {
-    val context = LocalContext.current
-
-    // Fetch user info when the profile screen is displayed
-//    LaunchedEffect(Unit) {
-//        viewModel.fetchUserInfo()
-//    }
-
-    // Observe LiveData as State
-    val name by viewModel.name.observeAsState("Loading...")
-    val username by viewModel.username.observeAsState("Loading...")
-
+fun BodyContent(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
-        Text(text = "Profile Screen")
-        Text(text = "Full Name: $name")
-        Text(text = "Username: $username")
-
-        // Logout Button
-        Button(onClick = { logout(context) }) {
-            Text(text = "Logout")
+        ProfileSection()
+        Spacer(modifier = Modifier.height(8.dp))
+        ProfileStats()
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = { /* Edit profile action */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp)),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+        ) {
+            Text("Edit Profile")
         }
-
-        // Delete Account Button
-        Button(onClick = { deleteAccount(context) }) {
-            Text(text = "Delete Account")
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+        PhotoGrid()
     }
 }
 
-fun navigateToLogin(context: Context) {
-    val intent = Intent(context, LoginActivity::class.java)
-    context.startActivity(intent)
-}
-
-fun logout(context: Context) {
-    val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    auth.signOut()
-    navigateToLogin(context)
-}
-
-fun deleteAccount(context: Context) {
-    val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
-    val db = FirebaseFirestore.getInstance()
-
-    user?.let { currentUser ->
-        val userId = currentUser.uid
-
-        // Delete user data from Firestore
-        db.collection("users").document(userId)
-            .delete()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // After user data is deleted from Firestore, delete the user from Authentication
-                    currentUser.delete()
-                        .addOnCompleteListener { authTask ->
-                            if (authTask.isSuccessful) {
-                                Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
-                                navigateToLogin(context)
-                            } else {
-                                Toast.makeText(context, "Failed to delete account from Authentication: ${authTask.exception?.message}", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                } else {
-                    Toast.makeText(context, "Failed to delete user data: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
+@Composable
+fun ProfileSection() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.account_circle_24), // Ensure this resource exists
+            contentDescription = "Profile Picture",
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .border(2.dp, Color.Black, CircleShape),
+            contentScale = ContentScale.Crop
+        )
+        Text("Username", fontSize = 24.sp, fontWeight = FontWeight.Bold)
     }
 }
 
+@Composable
+fun ProfileStats() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        ProfileStat("300", "Followers")
+        ProfileStat("200", "Following")
+        ProfileStat("60", "Likes")
+    }
+}
 
+@Composable
+fun ProfileStat(number: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(number, fontWeight = FontWeight.Bold)
+        Text(label)
+    }
+}
+
+@Composable
+fun PhotoGrid() {
+    // Implement a grid layout using LazyVerticalGrid or a custom grid logic
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewProfileScreen() {
+    ProfileScreen()
+}

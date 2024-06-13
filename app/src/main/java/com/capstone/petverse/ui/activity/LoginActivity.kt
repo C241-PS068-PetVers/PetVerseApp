@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.capstone.petverse.R
-import com.capstone.petverse.ui.viewmodel.LoginFormState
 import com.capstone.petverse.ui.viewmodel.LoginViewModel
+import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 
 class LoginActivity : ComponentActivity() {
     private val interFamily = FontFamily(
@@ -58,13 +58,15 @@ class LoginActivity : ComponentActivity() {
 
     @Composable
     fun PetverseAppLogin() {
+        val factory = ViewModelFactory.getInstance(application, LocalContext.current)
+        val viewModel: LoginViewModel = viewModel(factory = factory)
         Surface(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.systemBars),
             color = MaterialTheme.colorScheme.onPrimary
         ) {
-            LoginScreen()
+            LoginScreen(viewModel)
         }
     }
 
@@ -119,10 +121,10 @@ class LoginActivity : ComponentActivity() {
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    @Preview
     @Composable
-    fun LoginScreen(viewModel: LoginViewModel = viewModel()) {
+    fun LoginScreen(viewModel: LoginViewModel) {
         val loginFormState by viewModel.loginFormState.observeAsState()
+        val isLoading by viewModel.isLoading.observeAsState(false)
         val scrollState = rememberScrollState()
         val context = LocalContext.current
 
@@ -222,26 +224,32 @@ class LoginActivity : ComponentActivity() {
                                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.colorPrimary)),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.login),
+                                if (isLoading) {
+                                    CircularProgressIndicator(
                                         color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontFamily = interFamily
+                                        modifier = Modifier.size(24.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Icon(
-                                        imageVector = rememberArrowForward(),
-                                        contentDescription = "Arrow Forward",
-                                        tint = Color.White
-                                    )
+                                } else {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.login),
+                                            color = Color.White,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontFamily = interFamily
+                                        )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Icon(
+                                            imageVector = rememberArrowForward(),
+                                            contentDescription = "Arrow Forward",
+                                            tint = Color.White
+                                        )
+                                    }
                                 }
-
                             }
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -253,7 +261,7 @@ class LoginActivity : ComponentActivity() {
                                 fontFamily = interFamily,
                                 color = colorResource(id = R.color.colorPrimaryDark),
                                 modifier = Modifier.clickable {
-                                    viewModel.navigateToResetPassword(context)
+                                    viewModel.navigateToSignup(context)
                                 }
                             )
                         }
@@ -272,18 +280,7 @@ class LoginActivity : ComponentActivity() {
                                 color = colorResource(id = R.color.colorPrimaryDark)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringResource(R.string.signup),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                fontFamily = interFamily,
-                                color = colorResource(id = R.color.colorPrimary),
-                                modifier = Modifier.clickable {
-                                    viewModel.navigateToSignup(context)
-                                }
-                            )
                         }
-
                     }
                 }
             }

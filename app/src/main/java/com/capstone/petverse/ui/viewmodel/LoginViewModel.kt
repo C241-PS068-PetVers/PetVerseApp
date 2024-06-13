@@ -9,17 +9,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.capstone.petverse.MainActivity
-import com.capstone.petverse.ui.activity.SignupActivity
+import com.capstone.petverse.data.model.UserModel
 import com.capstone.petverse.data.repository.UserRepository
-import com.capstone.petverse.di.Injection
+import com.capstone.petverse.ui.activity.SignupActivity
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
-
-    private val userRepository: UserRepository = Injection.provideUserRepository()
+class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     private val _loginFormState = MutableLiveData(LoginFormState())
     val loginFormState: LiveData<LoginFormState> = _loginFormState
+
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
 
     fun onEmailChange(email: String) {
         val currentState = _loginFormState.value ?: LoginFormState()
@@ -41,19 +42,28 @@ class LoginViewModel : ViewModel() {
         val password = _loginFormState.value?.password.orEmpty()
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
+            _isLoading.value = true
             viewModelScope.launch {
                 try {
                     val response = userRepository.loginUser(email, password)
                     if (response.isSuccessful && response.body()?.success == true) {
-                        Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                        navigateToMain(context)
+                        val user = response.body()?.user
+                        val token = response.body()?.token
+                        if (user != null && token != null) {
+                            val userModel = UserModel(user.email ?: "", token, true)
+                            userRepository.saveSession(userModel)
+                            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                            navigateToMain(context)
+                        }
                     } else {
                         Toast.makeText(context, "Login Failed: ${response.body()?.message}", Toast.LENGTH_SHORT).show()
-                        Log.e("SignupError", "Error: ${response.body()?.message}")
+                        Log.e("LoginError", "Error: ${response.body()?.message}")
                     }
                 } catch (e: Exception) {
                     Toast.makeText(context, "Login Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                    Log.e("Login Failed:", "Error: ${e.message}")
+                    Log.e("LoginError", "Exception: ${e.message}")
+                } finally {
+                    _isLoading.value = false
                 }
             }
         } else {
@@ -63,11 +73,6 @@ class LoginViewModel : ViewModel() {
 
     fun navigateToMain(context: Context) {
         val intent = Intent(context, MainActivity::class.java)
-        context.startActivity(intent)
-    }
-
-    fun navigateToResetPassword(context: Context) {
-        val intent = Intent(context, SignupActivity::class.java)
         context.startActivity(intent)
     }
 

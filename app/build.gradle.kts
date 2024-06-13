@@ -62,12 +62,12 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
+    implementation(libs.androidx.datastore.core.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation (libs.androidx.lifecycle.viewmodel.compose)
+
 
 //    jetpack compose
     implementation ("androidx.compose:compose-bom:2024.05.00")
@@ -77,6 +77,8 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    implementation ("androidx.datastore:datastore-preferences:1.1.1")
+    implementation ("androidx.datastore:datastore-core:1.1.1")
 
     //navigation
     implementation ("androidx.navigation:navigation-compose:2.7.0-rc01")
@@ -89,17 +91,17 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     debugImplementation(libs.androidx.ui.test.manifest)
 
-//    firestore/firebase
-//    implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
-    implementation ("com.google.firebase:firebase-firestore-ktx:25.0.0")
-//    implementation ("com.google.cloud:google-cloud-firestore:2.24.0")
-//    implementation ("com.google.cloud:google-cloud-firestore:3.21.3")
-
-
+    // Camerax implementation
+    val cameraxVersion = "1.3.1"
+    implementation (libs.androidx.camera.core.v131)
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.view.v131)
+    implementation (libs.androidx.camera.lifecycle.v131)
 
     //Api
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
 
 
 }

@@ -42,8 +42,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.capstone.petverse.R
 import com.capstone.petverse.ui.viewmodel.SignupViewModel
+import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 
 class SignupActivity : ComponentActivity() {
     private val interFamily = FontFamily(
@@ -52,18 +54,19 @@ class SignupActivity : ComponentActivity() {
         Font(R.font.inter_regular, FontWeight.Normal)
     )
 
-    private val viewModel: SignupViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            PetverseAppSignup(viewModel)
+            PetverseAppSignup()
         }
     }
 
     @Composable
-    fun PetverseAppSignup(viewModel: SignupViewModel) {
+    fun PetverseAppSignup() {
+//        val context = LocalContext.current
+        val factory = ViewModelFactory.getInstance(application, LocalContext.current)
+        val viewModel: SignupViewModel = viewModel(factory = factory)
         Surface(
             modifier = Modifier
                 .fillMaxSize()
