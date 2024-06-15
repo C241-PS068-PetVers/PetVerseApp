@@ -25,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -48,13 +47,13 @@ import com.capstone.petverse.data.pref.dataStore
 import com.capstone.petverse.ui.activity.CameraPreviewScreen
 import com.capstone.petverse.ui.activity.HomeScreen
 import com.capstone.petverse.ui.activity.LikeHistoryActivity
+import com.capstone.petverse.ui.activity.ProfileScreen
 import com.capstone.petverse.ui.activity.UploadPostScreen
 import com.capstone.petverse.ui.activity.WelcomeActivity
 import com.capstone.petverse.ui.components.Search
 import com.capstone.petverse.ui.model.BottomBarItem
 import com.capstone.petverse.ui.model.Screen
 import com.capstone.petverse.ui.theme.PetVerseTheme
-import com.capstone.petverse.ui.viewmodel.SignupViewModel
 import com.capstone.petverse.ui.viewmodel.UploadPostViewModel
 import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 import kotlinx.coroutines.flow.first
@@ -116,13 +115,13 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                 .padding(innerPadding)
                 .background(Color.White)
         ) {
-            if (currentRoute != Screen.Upload.route) {
+            if (currentRoute != Screen.Profile.route && currentRoute != Screen.Upload.route) {
                 Search(modifier = Modifier.padding(5.dp))
             }
+
             NavHost(navController, startDestination = Screen.Home.route) {
                 composable(Screen.Home.route) {
-
-                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application, context)
+                    val factory = ViewModelFactory.getInstance(LocalContext.current.applicationContext as Application, LocalContext.current)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     HomeScreen(viewModel = uploadPostViewModel)
                 }
@@ -133,19 +132,16 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                     if (isCameraPermissionGranted) {
                         CameraPreviewScreen(navController)
                     } else {
-                        Toast.makeText(context, "Camera permission is required to use this feature", Toast.LENGTH_LONG).show()
+                        Toast.makeText(LocalContext.current, "Camera permission is required to use this feature", Toast.LENGTH_LONG).show()
                     }
                 }
                 composable(Screen.Upload.route) {
-                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application, context)
+                    val factory = ViewModelFactory.getInstance(LocalContext.current.applicationContext as Application, LocalContext.current)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     UploadPostScreen(navController, uploadPostViewModel)
                 }
                 composable(Screen.Profile.route) {
-                    val viewModel: SignupViewModel = viewModel()
-                    CompositionLocalProvider(LocalContext provides LocalContext.current) {
-                        // ProfileActivity(viewModel = viewModel)
-                    }
+                    ProfileScreen(navController)
                 }
             }
         }

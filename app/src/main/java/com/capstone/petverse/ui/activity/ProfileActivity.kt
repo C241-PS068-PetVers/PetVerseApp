@@ -1,37 +1,40 @@
+package com.capstone.petverse.ui.activity
+
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.capstone.petverse.R // Ensure this is correct
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.capstone.petverse.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navController: NavController) {
     Scaffold(
-        topBar = { ProfileTopBar() },
+        topBar = { ProfileTopBar(navController) },
         content = { paddingValues ->
             BodyContent(modifier = Modifier.padding(paddingValues))
         }
@@ -40,12 +43,12 @@ fun ProfileScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileTopBar() {
+fun ProfileTopBar(navController: NavController) {
     TopAppBar(
         title = {},
-        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
         actions = {
-            IconButton(onClick = { /* Settings action */ }) {
+            IconButton(onClick = { /*TODO: navigate to SettingsScreen*/ }) {
                 Icon(Icons.Filled.Settings, contentDescription = "Settings")
             }
         }
@@ -57,23 +60,31 @@ fun BodyContent(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ProfileSection()
         Spacer(modifier = Modifier.height(8.dp))
         ProfileStats()
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = { /* Edit profile action */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp)),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+            onClick = { /* TODO: Handle edit profile action */ },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = colorResource(id = R.color.colorTextBlack)
+            ),
+            border = BorderStroke(1.dp, colorResource(id = R.color.colorTextBlack)),
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.padding(8.dp)
         ) {
-            Text("Edit Profile")
+            Text(
+                text = "Edit Profile",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        PhotoGrid()
+        Spacer(modifier = Modifier.height(8.dp))
+        ProfileTab()
     }
 }
 
@@ -84,7 +95,7 @@ fun ProfileSection() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Image(
-            painter = painterResource(id = R.drawable.account_circle_24), // Ensure this resource exists
+            painter = painterResource(id = R.drawable.account_circle_24),
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(100.dp)
@@ -99,32 +110,160 @@ fun ProfileSection() {
 @Composable
 fun ProfileStats() {
     Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 16.dp)
     ) {
-        ProfileStat("300", "Followers")
-        ProfileStat("200", "Following")
-        ProfileStat("60", "Likes")
+        ProfileStatItem(value = "300", label = "Followers")
+        VerticalDivider(
+            color = Color.Gray,
+            modifier = Modifier
+                .height(40.dp)
+                .width(1.dp)
+                .align(Alignment.CenterVertically)
+        )
+        ProfileStatItem(value = "200", label = "Following")
+        VerticalDivider(
+            color = Color.Gray,
+            modifier = Modifier
+                .height(40.dp)
+                .width(1.dp)
+                .align(Alignment.CenterVertically)
+        )
+        ProfileStatItem(value = "60", label = "Likes")
     }
 }
 
 @Composable
-fun ProfileStat(number: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(number, fontWeight = FontWeight.Bold)
-        Text(label)
+fun ProfileStatItem(value: String, label: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(80.dp)
+    ) {
+        Text(text = value, fontWeight = FontWeight.Bold)
+        Text(text = label)
     }
 }
 
 @Composable
-fun PhotoGrid() {
-    // Implement a grid layout using LazyVerticalGrid or a custom grid logic
+fun ProfileTab() {
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        indicator = { tabPositions ->
+            TabRowDefaults.SecondaryIndicator(
+                Modifier
+                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                    .fillMaxWidth()
+                    .background(colorResource(id = R.color.colorPrimary))
+            )
+        }
+    ) {
+        Tab(
+            selected = selectedTabIndex == 0,
+            onClick = { selectedTabIndex = 0 },
+            modifier = Modifier.height(42.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.home_outlined),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+        Tab(
+            selected = selectedTabIndex == 1,
+            onClick = { selectedTabIndex = 1 },
+            modifier = Modifier.height(42.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.home_outlined),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    AnimatedContent(
+        targetState = selectedTabIndex,
+        label = "ProfileTabs", // Set the label for better inspection
+        transitionSpec = {
+            if (targetState > initialState) {
+                slideInHorizontally { width -> width } + fadeIn(tween(300)) togetherWith
+                        slideOutHorizontally { width -> -width } + fadeOut(tween(300))
+            } else {
+                slideInHorizontally { width -> -width } + fadeIn(tween(300)) togetherWith
+                        slideOutHorizontally { width -> width } + fadeOut(tween(300))
+            }.using(SizeTransform(false))
+        }
+    ) { index ->
+        when (index) {
+            0 -> ContentPost()
+            1 -> AdoptionPost()
+        }
+    }
+}
+
+@Composable
+fun ContentPost() {
+    val photos = remember { listOf(R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption) }
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        contentPadding = PaddingValues(4.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(photos.size) { index ->
+            Image(
+                painter = painterResource(id = photos[index]),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+@Composable
+fun AdoptionPost() {
+    val photos = remember { listOf(R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption) }
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        contentPadding = PaddingValues(4.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(photos.size) { index ->
+            Image(
+                painter = painterResource(id = photos[index]),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewProfileScreen() {
-    ProfileScreen()
+    val navController = rememberNavController()
+    ProfileScreen(navController = navController)
 }
