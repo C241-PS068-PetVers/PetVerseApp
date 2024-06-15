@@ -47,4 +47,9 @@
     <string name="help_center">Help Center</string>
     <string name="terms_of_service">Terms of Service</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="title_activity_edit_profile">EditProfileActivity</string>
+
+    <string name="edit_profile">Edit Profile</string>
+    <string name="name">Name</string>
+    <string name="username">Username</string>
 </resources>

@@ -45,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import com.capstone.petverse.data.pref.UserPreference
 import com.capstone.petverse.data.pref.dataStore
 import com.capstone.petverse.ui.activity.CameraPreviewScreen
+import com.capstone.petverse.ui.activity.EditProfileScreen
 import com.capstone.petverse.ui.activity.HomeScreen
 import com.capstone.petverse.ui.activity.LikeHistoryActivity
 import com.capstone.petverse.ui.activity.ProfileScreen
@@ -108,20 +109,20 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
     val context = LocalContext.current
 
     Scaffold(
-        bottomBar = { BottomBar(navController) }
+        bottomBar = { if (currentRoute != Screen.EditProfile.route) BottomBar(navController) }
     ) { innerPadding ->
         Column(
             modifier = modifier
                 .padding(innerPadding)
                 .background(Color.White)
         ) {
-            if (currentRoute != Screen.Profile.route && currentRoute != Screen.Upload.route) {
+            if (currentRoute != Screen.Profile.route && currentRoute != Screen.Upload.route && currentRoute != Screen.EditProfile.route) {
                 Search(modifier = Modifier.padding(5.dp))
             }
 
             NavHost(navController, startDestination = Screen.Home.route) {
                 composable(Screen.Home.route) {
-                    val factory = ViewModelFactory.getInstance(LocalContext.current.applicationContext as Application, LocalContext.current)
+                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application, context)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     HomeScreen(viewModel = uploadPostViewModel)
                 }
@@ -132,16 +133,19 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                     if (isCameraPermissionGranted) {
                         CameraPreviewScreen(navController)
                     } else {
-                        Toast.makeText(LocalContext.current, "Camera permission is required to use this feature", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Camera permission is required to use this feature", Toast.LENGTH_LONG).show()
                     }
                 }
                 composable(Screen.Upload.route) {
-                    val factory = ViewModelFactory.getInstance(LocalContext.current.applicationContext as Application, LocalContext.current)
+                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application, context)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     UploadPostScreen(navController, uploadPostViewModel)
                 }
                 composable(Screen.Profile.route) {
                     ProfileScreen(navController)
+                }
+                composable(Screen.EditProfile.route) {
+                    EditProfileScreen(navController)
                 }
             }
         }
@@ -160,27 +164,27 @@ fun BottomBar(
             BottomBarItem(
                 title = stringResource(R.string.menu_home),
                 icon = Icons.Default.Home,
-                route = "home"
+                route = Screen.Home.route
             ),
             BottomBarItem(
                 title = stringResource(R.string.menu_favorite),
                 icon = Icons.Default.Favorite,
-                route = "favorite"
+                route = Screen.Favorite.route
             ),
             BottomBarItem(
                 title = stringResource(R.string.detection),
                 icon = Icons.Default.PhotoCamera,
-                route = "detection"
+                route = Screen.Detection.route
             ),
             BottomBarItem(
                 title = stringResource(R.string.upload_post),
                 icon = Icons.Default.Upload,
-                route = "upload"
+                route = Screen.Upload.route
             ),
             BottomBarItem(
                 title = stringResource(R.string.menu_profile),
                 icon = Icons.Default.AccountCircle,
-                route = "profile"
+                route = Screen.Profile.route
             ),
         )
         navigationItems.forEach { item ->

@@ -1,5 +1,6 @@
 package com.capstone.petverse.ui.activity
 
+import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,21 +36,24 @@ import com.capstone.petverse.R
 @Composable
 fun ProfileScreen(navController: NavController) {
     Scaffold(
-        topBar = { ProfileTopBar(navController) },
+        topBar = { ProfileTopBar() },
         content = { paddingValues ->
-            BodyContent(modifier = Modifier.padding(paddingValues))
+            BodyContent(modifier = Modifier.padding(paddingValues), navController)
         }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileTopBar(navController: NavController) {
+fun ProfileTopBar() {
+    val context = LocalContext.current
     TopAppBar(
         title = {},
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
         actions = {
-            IconButton(onClick = { /*TODO: navigate to SettingsScreen*/ }) {
+            IconButton(onClick = {
+                context.startActivity(Intent(context, SettingsActivity::class.java))
+            }) {
                 Icon(Icons.Filled.Settings, contentDescription = "Settings")
             }
         }
@@ -56,7 +61,7 @@ fun ProfileTopBar(navController: NavController) {
 }
 
 @Composable
-fun BodyContent(modifier: Modifier = Modifier) {
+fun BodyContent(modifier: Modifier = Modifier, navController: NavController) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -68,7 +73,7 @@ fun BodyContent(modifier: Modifier = Modifier) {
         ProfileStats()
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = { /* TODO: Handle edit profile action */ },
+            onClick = { navController.navigate("edit_profile") },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
                 contentColor = colorResource(id = R.color.colorTextBlack)
@@ -103,7 +108,8 @@ fun ProfileSection() {
                 .border(2.dp, Color.Black, CircleShape),
             contentScale = ContentScale.Crop
         )
-        Text("Username", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text("Name", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("@username", fontSize = 15.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -199,7 +205,7 @@ fun ProfileTab() {
 
     AnimatedContent(
         targetState = selectedTabIndex,
-        label = "ProfileTabs", // Set the label for better inspection
+        label = "ProfileTabs",
         transitionSpec = {
             if (targetState > initialState) {
                 slideInHorizontally { width -> width } + fadeIn(tween(300)) togetherWith
