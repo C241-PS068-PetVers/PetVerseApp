@@ -6,4 +6,5 @@ sealed class Screen(val route: String) {
     object Upload : Screen("upload")
     object Detection : Screen("detection")
     object Profile : Screen("profile")
+    object EditProfile : Screen("edit_profile")
 }
