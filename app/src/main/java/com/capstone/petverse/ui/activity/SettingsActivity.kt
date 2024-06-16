@@ -1,5 +1,6 @@
 package com.capstone.petverse.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,9 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -29,7 +33,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.capstone.petverse.R
+import com.capstone.petverse.data.pref.UserPreference
+import com.capstone.petverse.data.pref.dataStore
 import com.capstone.petverse.ui.activity.ui.theme.PetVerseTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class SettingsActivity : ComponentActivity() {
     private val interFamily = FontFamily(
@@ -61,6 +70,10 @@ fun SettingsScreen(interFamily: FontFamily = FontFamily.Default, onBackClick: ()
 
 @Composable
 fun SettingsContent(interFamily: FontFamily, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val userPreference = UserPreference.getInstance(context.dataStore)
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -81,6 +94,19 @@ fun SettingsContent(interFamily: FontFamily, modifier: Modifier = Modifier) {
             SettingsItem(text = stringResource(R.string.terms_of_service), onClick = { /* TODO */ }, isExternalLink = true, interFamily = interFamily)
             SettingsItem(text = stringResource(R.string.privacy_policy), onClick = { /* TODO */ }, isExternalLink = true, interFamily = interFamily)
         }
+
+        LogOutButton(
+            text = stringResource(R.string.log_out),
+            onClick = {
+                coroutineScope.launch {
+                    userPreference.logout()
+                    val intent = Intent(context, WelcomeActivity::class.java)
+                    context.startActivity(intent)
+                    (context as ComponentActivity).finish()
+                }
+            },
+            interFamily = interFamily
+        )
     }
 }
 
@@ -95,7 +121,7 @@ fun SettingsSection(title: String, interFamily: FontFamily, content: @Composable
             modifier = Modifier.padding(vertical = 8.dp)
         )
         content()
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
     }
 }
 
@@ -118,6 +144,28 @@ fun SettingsItem(text: String, onClick: () -> Unit, interFamily: FontFamily, isE
         Icon(
             imageVector = if (isExternalLink) Icons.Filled.ArrowOutward else Icons.AutoMirrored.Filled.ArrowForwardIos,
             contentDescription = null
+        )
+    }
+}
+
+@Composable
+fun LogOutButton(text: String, onClick: () -> Unit, interFamily: FontFamily) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        ),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Text(
+            text = text,
+            fontFamily = interFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 17.sp,
+            color = Color.White
         )
     }
 }

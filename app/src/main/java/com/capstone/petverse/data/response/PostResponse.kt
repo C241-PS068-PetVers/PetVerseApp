@@ -6,6 +6,9 @@ data class PostResponse(
 	@SerializedName("id")
 	val id: String? = null,
 
+	@SerializedName("phoneNumber")
+	val phoneNumber: String? = null,
+
 	@SerializedName("createdAt")
 	val createdAt: CreatedAt? = null,
 

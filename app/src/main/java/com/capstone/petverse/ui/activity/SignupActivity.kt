@@ -65,7 +65,7 @@ class SignupActivity : ComponentActivity() {
     @Composable
     fun PetverseAppSignup() {
 //        val context = LocalContext.current
-        val factory = ViewModelFactory.getInstance(application, LocalContext.current)
+        val factory = ViewModelFactory.getInstance(application)
         val viewModel: SignupViewModel = viewModel(factory = factory)
         Surface(
             modifier = Modifier

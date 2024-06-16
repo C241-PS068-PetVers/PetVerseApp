@@ -21,7 +21,7 @@ import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: UploadPostViewModel = viewModel(factory = ViewModelFactory.getInstance(LocalContext.current.applicationContext as Application, LocalContext.current))
+    viewModel: UploadPostViewModel = viewModel(factory = ViewModelFactory.getInstance(LocalContext.current.applicationContext as Application))
 ) {
     val posts by viewModel.posts.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -38,7 +38,6 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     color = colorResource(id = R.color.colorPrimary)
-
                 )
             }
             if (posts.isEmpty() && !isLoading) {

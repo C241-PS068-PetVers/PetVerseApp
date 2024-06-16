@@ -3,17 +3,11 @@ package com.capstone.petverse.data.remote
 import com.capstone.petverse.data.response.LoginResponse
 import com.capstone.petverse.data.response.PostResponse
 import com.capstone.petverse.data.response.SignupResponse
+import com.capstone.petverse.data.response.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
+import retrofit2.http.*
 
 interface ApiService {
     @FormUrlEncoded
@@ -35,8 +29,7 @@ interface ApiService {
     @Multipart
     @POST("/api/posts/upload")
     suspend fun createPost(
-        @Part("description") description: RequestBody,
-        @Part("category") category: RequestBody,
+        @PartMap parts: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part image: MultipartBody.Part,
         @Header("Authorization") token: String
     ): Response<PostResponse>
@@ -58,4 +51,8 @@ interface ApiService {
         @Body postId: Map<String, String>
     ): Response<PostResponse>
 
+    @GET("/api/user/profile")
+    suspend fun getUserProfile(
+        @Header("Authorization") token: String
+    ): Response<UserProfileResponse>
 }

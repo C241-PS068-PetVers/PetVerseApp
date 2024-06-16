@@ -29,7 +29,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
             UserModel(
                 preferences[EMAIL_KEY] ?: "",
                 preferences[TOKEN_KEY] ?: "",
-                isLogin && currentTime < expiryTime
+                isLogin && currentTime < expiryTime,
             )
         }
     }

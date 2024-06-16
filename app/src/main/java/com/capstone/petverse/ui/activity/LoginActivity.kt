@@ -5,12 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -19,20 +18,17 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.*
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -42,12 +38,6 @@ import com.capstone.petverse.ui.viewmodel.LoginViewModel
 import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 
 class LoginActivity : ComponentActivity() {
-    private val interFamily = FontFamily(
-        Font(R.font.inter_bold, FontWeight.Bold),
-        Font(R.font.inter_medium, FontWeight.Medium),
-        Font(R.font.inter_regular, FontWeight.Normal)
-    )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -58,7 +48,7 @@ class LoginActivity : ComponentActivity() {
 
     @Composable
     fun PetverseAppLogin() {
-        val factory = ViewModelFactory.getInstance(application, LocalContext.current)
+        val factory = ViewModelFactory.getInstance(application)
         val viewModel: LoginViewModel = viewModel(factory = factory)
         Surface(
             modifier = Modifier
@@ -70,61 +60,13 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun rememberArrowForward(): ImageVector {
-        return remember {
-            ImageVector.Builder(
-                name = "arrow_forward",
-                defaultWidth = 40.0.dp,
-                defaultHeight = 40.0.dp,
-                viewportWidth = 40.0f,
-                viewportHeight = 40.0f
-            ).apply {
-                path(
-                    fill = SolidColor(Color.Black),
-                    fillAlpha = 1f,
-                    stroke = null,
-                    strokeAlpha = 1f,
-                    strokeLineWidth = 1.0f,
-                    strokeLineCap = StrokeCap.Butt,
-                    strokeLineJoin = StrokeJoin.Miter,
-                    strokeLineMiter = 1f,
-                    pathFillType = PathFillType.NonZero
-                ) {
-                    moveTo(19.083f, 32.167f)
-                    quadToRelative(-0.375f, -0.375f, -0.375f, -0.938f)
-                    quadToRelative(0f, -0.562f, 0.375f, -0.937f)
-                    lineToRelative(9f, -9f)
-                    horizontalLineTo(8.208f)
-                    quadToRelative(-0.583f, 0f, -0.958f, -0.375f)
-                    reflectiveQuadTo(6.875f, 20f)
-                    quadToRelative(0f, -0.542f, 0.375f, -0.938f)
-                    quadToRelative(0.375f, -0.395f, 0.958f, -0.395f)
-                    horizontalLineToRelative(19.875f)
-                    lineToRelative(-9f, -8.959f)
-                    quadToRelative(-0.375f, -0.375f, -0.375f, -0.958f)
-                    reflectiveQuadToRelative(0.375f, -0.958f)
-                    quadToRelative(0.375f, -0.375f, 0.917f, -0.375f)
-                    reflectiveQuadToRelative(0.917f, 0.375f)
-                    lineToRelative(11.291f, 11.291f)
-                    quadToRelative(0.209f, 0.209f, 0.292f, 0.438f)
-                    quadToRelative(0.083f, 0.229f, 0.083f, 0.479f)
-                    quadToRelative(0f, 0.25f, -0.083f, 0.479f)
-                    quadToRelative(-0.083f, 0.229f, -0.292f, 0.438f)
-                    lineTo(20.917f, 32.208f)
-                    quadToRelative(-0.375f, 0.375f, -0.917f, 0.354f)
-                    quadToRelative(-0.542f, -0.02f, -0.917f, -0.395f)
-                    close()
-                }
-            }.build()
-        }
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun LoginScreen(viewModel: LoginViewModel) {
         val loginFormState by viewModel.loginFormState.observeAsState()
         val isLoading by viewModel.isLoading.observeAsState(false)
+        val emailError by viewModel.emailError.observeAsState()
+        val passwordError by viewModel.passwordError.observeAsState()
         val scrollState = rememberScrollState()
         val context = LocalContext.current
 
@@ -142,18 +84,18 @@ class LoginActivity : ComponentActivity() {
                         text = stringResource(R.string.login),
                         fontSize = 40.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = interFamily,
+                        fontFamily = FontFamily.Default,
                         color = colorResource(id = R.color.colorPrimary)
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Column(horizontalAlignment = Alignment.Start){
+                    Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = stringResource(R.string.email_label),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
-                            fontFamily = interFamily,
+                            fontFamily = FontFamily.Default,
                             color = colorResource(id = R.color.colorPrimaryDark)
                         )
 
@@ -163,18 +105,17 @@ class LoginActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth(),
                             value = loginFormState?.email ?: "",
                             onValueChange = { viewModel.onEmailChange(it) },
-                            singleLine = true,
-                            trailingIcon = {
-                                if (loginFormState?.email?.isNotBlank() == true)
-                                    IconButton(onClick = { viewModel.onEmailChange("") }) {
-                                        Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear email")
-                                    }
-                            },
+                            isError = emailError != null,
                             colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = colorResource(id = R.color.colorPrimary),
-                                unfocusedBorderColor = colorResource(id = R.color.colorPrimaryDark)
-                            )
+                                focusedBorderColor = if (emailError != null) Color.Red else colorResource(id = R.color.colorPrimary),
+                                unfocusedBorderColor = if (emailError != null) Color.Red else colorResource(id = R.color.colorPrimaryDark)
+                            ),
+                            singleLine = true
                         )
+
+                        if (emailError != null) {
+                            Text(text = emailError ?: "", color = Color.Red, style = TextStyle(fontSize = 12.sp))
+                        }
 
                         Spacer(modifier = Modifier.height(10.dp))
 
@@ -182,7 +123,7 @@ class LoginActivity : ComponentActivity() {
                             text = stringResource(R.string.password_label),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
-                            fontFamily = interFamily,
+                            fontFamily = FontFamily.Default,
                             color = colorResource(id = R.color.colorPrimaryDark)
                         )
 
@@ -192,22 +133,27 @@ class LoginActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth(),
                             value = loginFormState?.password ?: "",
                             onValueChange = { viewModel.onPasswordChange(it) },
+                            isError = passwordError != null,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = if (passwordError != null) Color.Red else colorResource(id = R.color.colorPrimary),
+                                unfocusedBorderColor = if (passwordError != null) Color.Red else colorResource(id = R.color.colorPrimaryDark)
+                            ),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                             visualTransformation = if (loginFormState?.isPasswordVisible == true) VisualTransformation.None else PasswordVisualTransformation(),
                             trailingIcon = {
                                 IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
                                     Icon(
-                                        imageVector = if (loginFormState?.isPasswordVisible == true) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                        contentDescription = "Password Toggle"
+                                        imageVector = if (loginFormState?.isPasswordVisible == true) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                        contentDescription = if (loginFormState?.isPasswordVisible == true) "Hide password" else "Show password"
                                     )
                                 }
-                            },
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = colorResource(id = R.color.colorPrimary),
-                                unfocusedBorderColor = colorResource(id = R.color.colorPrimaryDark)
-                            )
+                            }
                         )
+
+                        if (passwordError != null) {
+                            Text(text = passwordError ?: "", color = Color.Red, style = TextStyle(fontSize = 12.sp))
+                        }
 
                         Spacer(modifier = Modifier.height(38.dp))
 
@@ -240,14 +186,9 @@ class LoginActivity : ComponentActivity() {
                                             color = Color.White,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            fontFamily = interFamily
+                                            fontFamily = FontFamily.Default
                                         )
                                         Spacer(modifier = Modifier.width(10.dp))
-                                        Icon(
-                                            imageVector = rememberArrowForward(),
-                                            contentDescription = "Arrow Forward",
-                                            tint = Color.White
-                                        )
                                     }
                                 }
                             }
@@ -258,7 +199,7 @@ class LoginActivity : ComponentActivity() {
                                 text = stringResource(R.string.forgot_password),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Normal,
-                                fontFamily = interFamily,
+                                fontFamily = FontFamily.Default,
                                 color = colorResource(id = R.color.colorPrimaryDark),
                                 modifier = Modifier.clickable {
                                     viewModel.navigateToSignup(context)
@@ -276,7 +217,7 @@ class LoginActivity : ComponentActivity() {
                                 text = stringResource(R.string.dont_have_account),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Normal,
-                                fontFamily = interFamily,
+                                fontFamily = FontFamily.Default,
                                 color = colorResource(id = R.color.colorPrimaryDark)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
@@ -286,4 +227,5 @@ class LoginActivity : ComponentActivity() {
             }
         }
     }
+
 }

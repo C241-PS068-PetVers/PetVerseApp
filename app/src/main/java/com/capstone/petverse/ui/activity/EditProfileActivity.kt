@@ -1,11 +1,13 @@
 package com.capstone.petverse.ui.activity
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,14 +23,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.capstone.petverse.R
 import com.capstone.petverse.ui.theme.PetVerseTheme
+import com.capstone.petverse.ui.viewmodel.EditProfileViewModel
 
 @Composable
-fun EditProfileScreen(navController: NavController) {
+fun EditProfileScreen(navController: NavController, editProfileViewModel: EditProfileViewModel = viewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -37,15 +41,36 @@ fun EditProfileScreen(navController: NavController) {
             )
         },
         content = { paddingValues ->
-            EditProfileContent(modifier = Modifier.padding(paddingValues))
+            EditProfileContent(
+                modifier = Modifier.padding(paddingValues),
+                editProfileViewModel = editProfileViewModel
+            )
         }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileContent(modifier: Modifier = Modifier) {
-    var name by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
+fun TopAppBar(title: String, onBackClick: () -> Unit) {
+    TopAppBar(
+        title = { Text(title) },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = Color.White,
+            navigationIconContentColor = Color.White
+        )
+    )
+}
+
+@Composable
+fun EditProfileContent(modifier: Modifier = Modifier, editProfileViewModel: EditProfileViewModel) {
+    val name by editProfileViewModel.name.collectAsState()
+    val username by editProfileViewModel.username.collectAsState()
 
     Column(
         modifier = modifier
@@ -83,11 +108,11 @@ fun EditProfileContent(modifier: Modifier = Modifier) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { editProfileViewModel.onNameChange(it) },
                 singleLine = true,
                 trailingIcon = {
                     if (name.isNotBlank())
-                        IconButton(onClick = { name = "" }) {
+                        IconButton(onClick = { editProfileViewModel.clearName() }) {
                             Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear name")
                         }
                 },
@@ -112,11 +137,11 @@ fun EditProfileContent(modifier: Modifier = Modifier) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = username,
-                onValueChange = { username = it },
+                onValueChange = { editProfileViewModel.onUsernameChange(it) },
                 singleLine = true,
                 trailingIcon = {
                     if (username.isNotBlank())
-                        IconButton(onClick = { username = "" }) {
+                        IconButton(onClick = { editProfileViewModel.clearUsername() }) {
                             Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear username")
                         }
                 },

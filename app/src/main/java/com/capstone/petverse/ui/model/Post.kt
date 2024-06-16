@@ -22,7 +22,8 @@ data class PostUser(
     val description: String,
     val category: String,
     val likes: List<String> = emptyList(),
-    val commentsCount: Int = 0
+    val commentsCount: Int = 0,
+    val phoneNumber: String? = null
 )
 
 //val dummyMenu = listOf(

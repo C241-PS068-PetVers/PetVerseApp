@@ -25,6 +25,7 @@ class UploadPostViewModel(application: Application, private val userRepository: 
     val bitmap = mutableStateOf<Bitmap?>(null)
     val selectedCategory = mutableStateOf("")
     val description = mutableStateOf("")
+    val phoneNumber = mutableStateOf("") // New state for phone number
     val userSession = mutableStateOf<UserModel?>(null)
     private val _posts = MutableStateFlow<List<PostUser>>(emptyList())
     private val _isLoading = MutableStateFlow(true)
@@ -57,6 +58,10 @@ class UploadPostViewModel(application: Application, private val userRepository: 
         description.value = desc
     }
 
+    fun setPhoneNumber(number: String) {
+        phoneNumber.value = number
+    }
+
     fun onSubmitPost(navController: NavController) {
         viewModelScope.launch {
             userSession.value?.let { user ->
@@ -65,7 +70,8 @@ class UploadPostViewModel(application: Application, private val userRepository: 
                     description.value,
                     selectedCategory.value,
                     bitmap.value,
-                    token
+                    token,
+                    if (selectedCategory.value == "adoption") phoneNumber.value else null
                 )
                 if (postResponse.isSuccessful) {
                     fetchPosts()
@@ -84,19 +90,18 @@ class UploadPostViewModel(application: Application, private val userRepository: 
                 val token = user.token
                 val response = userRepository.getPosts(token)
                 if (response.isSuccessful) {
-                    val postsResponse = response.body()
-                    Log.d("UploadPostViewModel", "API Response: $postsResponse") // Log the API response
-                    _posts.value = postsResponse?.map { postResponse ->
+                    _posts.value = response.body()?.map { postResponse ->
                         mapPostToPostUser(postResponse)
                     } ?: emptyList()
+                    Log.d("UploadPostViewModel", "Fetched posts: ${_posts.value.size}")
                 } else {
-                    Log.e("UploadPostViewModel", "Error fetching posts: ${response.errorBody()?.string()}")
+                    // Handle error
+                    Log.e("UploadPostViewModel", "Failed to fetch posts: ${response.errorBody()}")
                 }
                 _isLoading.value = false
             }
         }
     }
-
 
     private fun mapPostToPostUser(post: PostResponse): PostUser {
         Log.d("UploadPostViewModel", "Mapping post: $post")
@@ -106,11 +111,12 @@ class UploadPostViewModel(application: Application, private val userRepository: 
             imageUrl = post.imageUrl ?: "",
             description = post.description ?: "",
             category = post.category ?: "",
-            likes = post.likes?.filterNotNull() ?: emptyList(),
-            commentsCount = 0 // Default value
+            likes = post.likes?.map { it ?: "" } ?: emptyList(),
+            commentsCount = 0,
+            phoneNumber = post.phoneNumber
+
         )
     }
-
 
     fun likePost(postId: String) {
         viewModelScope.launch {

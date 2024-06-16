@@ -7,9 +7,12 @@ import com.capstone.petverse.data.remote.ApiService
 import com.capstone.petverse.data.response.LoginResponse
 import com.capstone.petverse.data.response.PostResponse
 import com.capstone.petverse.data.response.SignupResponse
+import com.capstone.petverse.data.response.UserProfileResponse
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
@@ -35,17 +38,20 @@ class UserRepository private constructor(
         return response
     }
 
-    suspend fun createPost(description: String, category: String, bitmap: Bitmap?, token: String): Response<PostResponse> {
-        val descriptionBody = description.toRequestBody("text/plain".toMediaTypeOrNull())
-        val categoryBody = category.toRequestBody("text/plain".toMediaTypeOrNull())
+    suspend fun createPost(description: String, category: String, bitmap: Bitmap?, token: String, phoneNumber: String? = null): Response<PostResponse> {
+        val parts = mutableMapOf<String, RequestBody>()
+        parts["description"] = description.toRequestBody("text/plain".toMediaTypeOrNull())
+        parts["category"] = category.toRequestBody("text/plain".toMediaTypeOrNull())
+        phoneNumber?.let {
+            parts["phoneNumber"] = it.toRequestBody("text/plain".toMediaTypeOrNull())
+        }
 
         val stream = ByteArrayOutputStream()
         bitmap?.compress(Bitmap.CompressFormat.JPEG, 80, stream)
-        val byteArray = stream.toByteArray()
-        val requestBody = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull())
+        val requestBody = stream.toByteArray().toRequestBody("image/jpeg".toMediaTypeOrNull())
         val filePart = MultipartBody.Part.createFormData("image", "image.jpg", requestBody)
 
-        return apiService.createPost(descriptionBody, categoryBody, filePart, "Bearer $token")
+        return apiService.createPost(parts, filePart, "Bearer $token")
     }
 
     suspend fun getPosts(token: String): Response<List<PostResponse>> {
@@ -74,6 +80,20 @@ class UserRepository private constructor(
 
     suspend fun logout() {
         userPreference.logout()
+    }
+
+    fun parseErrorResponse(response: Response<*>): String {
+        return try {
+            val errorBody = response.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, LoginResponse::class.java)
+            errorResponse.message ?: "Unknown error occurred"
+        } catch (e: Exception) {
+            "Unknown error occurred"
+        }
+    }
+
+    suspend fun getUserProfile(token: String): Response<UserProfileResponse> {
+        return apiService.getUserProfile(token)
     }
 
     companion object {

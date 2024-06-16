@@ -34,12 +34,12 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
     val bitmap by viewModel.bitmap
     val selectedCategory by viewModel.selectedCategory
     val description by viewModel.description
+    val phoneNumber by viewModel.phoneNumber
     val coroutineScope = rememberCoroutineScope()
 
-    val launcher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-            viewModel.setImageUri(uri)
-        }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+        viewModel.setImageUri(uri)
+    }
 
     BackHandler {
         navController.popBackStack()
@@ -146,6 +146,17 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
             modifier = Modifier.fillMaxWidth()
         )
 
+        // Phone Number TextField for adoption category
+        if (selectedCategory == "adoption") {
+            Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                value = phoneNumber,
+                onValueChange = { viewModel.setPhoneNumber(it) },
+                label = { Text("Phone Number") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Submit Button
@@ -165,9 +176,9 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
                 text = "Post",
                 color = Color.White,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                fontFamily = interFamily
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
 }
+

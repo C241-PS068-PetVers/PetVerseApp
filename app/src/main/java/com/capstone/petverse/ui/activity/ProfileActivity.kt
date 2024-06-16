@@ -1,5 +1,7 @@
 package com.capstone.petverse.ui.activity
 
+import android.app.Application
+import android.content.Context
 import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -29,16 +31,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberImagePainter
 import com.capstone.petverse.R
+import com.capstone.petverse.data.pref.UserPreference
+import com.capstone.petverse.data.pref.dataStore
+import com.capstone.petverse.data.response.UserProfile
+import com.capstone.petverse.ui.viewmodel.ProfileViewModel
+import com.capstone.petverse.ui.viewmodel.ViewModelFactory
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(navController: NavController) {
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+    val profileViewModel: ProfileViewModel = viewModel(factory = ViewModelFactory.getInstance(application))
+
+    val userPreference = UserPreference.getInstance(context.dataStore)
+    val userProfile by profileViewModel.userProfile.collectAsState()
+
+    LaunchedEffect(Unit) {
+        userPreference.getSession().collect { user ->
+            if (user.isLogin) {
+                profileViewModel.fetchUserProfile("Bearer ${user.token}")
+            }
+        }
+    }
+
     Scaffold(
         topBar = { ProfileTopBar() },
         content = { paddingValues ->
-            BodyContent(modifier = Modifier.padding(paddingValues), navController)
+            BodyContent(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .background(Color.White),
+                navController = navController,
+                profileViewModel = profileViewModel,
+                userProfile = userProfile
+            )
         }
     )
 }
@@ -61,14 +95,19 @@ fun ProfileTopBar() {
 }
 
 @Composable
-fun BodyContent(modifier: Modifier = Modifier, navController: NavController) {
+fun BodyContent(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    profileViewModel: ProfileViewModel,
+    userProfile: UserProfile?
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ProfileSection()
+        ProfileSection(userProfile)
         Spacer(modifier = Modifier.height(8.dp))
         ProfileStats()
         Spacer(modifier = Modifier.height(8.dp))
@@ -89,18 +128,19 @@ fun BodyContent(modifier: Modifier = Modifier, navController: NavController) {
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        ProfileTab()
+        ProfileTab(profileViewModel)
     }
 }
 
 @Composable
-fun ProfileSection() {
+fun ProfileSection(userProfile: UserProfile?) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
+        val painter = rememberImagePainter(userProfile?.profilePicture ?: R.drawable.account_circle_24)
         Image(
-            painter = painterResource(id = R.drawable.account_circle_24),
+            painter = painter,
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(100.dp)
@@ -108,8 +148,8 @@ fun ProfileSection() {
                 .border(2.dp, Color.Black, CircleShape),
             contentScale = ContentScale.Crop
         )
-        Text("Name", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Text("@username", fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        Text(userProfile?.name ?: "Name", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("@${userProfile?.username ?: "username"}", fontSize = 15.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -153,8 +193,8 @@ fun ProfileStatItem(value: String, label: String) {
 }
 
 @Composable
-fun ProfileTab() {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+fun ProfileTab(profileViewModel: ProfileViewModel) {
+    val selectedTabIndex by profileViewModel.selectedTabIndex.collectAsState()
 
     TabRow(
         selectedTabIndex = selectedTabIndex,
@@ -169,11 +209,13 @@ fun ProfileTab() {
     ) {
         Tab(
             selected = selectedTabIndex == 0,
-            onClick = { selectedTabIndex = 0 },
+            onClick = { profileViewModel.onTabSelected(0) },
             modifier = Modifier.height(42.dp)
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -185,11 +227,13 @@ fun ProfileTab() {
         }
         Tab(
             selected = selectedTabIndex == 1,
-            onClick = { selectedTabIndex = 1 },
+            onClick = { profileViewModel.onTabSelected(1) },
             modifier = Modifier.height(42.dp)
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -217,15 +261,14 @@ fun ProfileTab() {
         }
     ) { index ->
         when (index) {
-            0 -> ContentPost()
-            1 -> AdoptionPost()
+            0 -> ContentPost(profileViewModel.photos)
+            1 -> AdoptionPost(profileViewModel.photos)
         }
     }
 }
 
 @Composable
-fun ContentPost() {
-    val photos = remember { listOf(R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption) }
+fun ContentPost(photos: List<Int>) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(4.dp),
@@ -246,8 +289,7 @@ fun ContentPost() {
 }
 
 @Composable
-fun AdoptionPost() {
-    val photos = remember { listOf(R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption, R.drawable.pet_adoption) }
+fun AdoptionPost(photos: List<Int>) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(4.dp),

@@ -22,14 +22,20 @@ class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _emailError = MutableLiveData<String?>(null)
+    val emailError: LiveData<String?> = _emailError
+
+    private val _passwordError = MutableLiveData<String?>(null)
+    val passwordError: LiveData<String?> = _passwordError
+
     fun onEmailChange(email: String) {
-        val currentState = _loginFormState.value ?: LoginFormState()
-        _loginFormState.value = currentState.copy(email = email)
+        _emailError.value = null  // Clear previous errors
+        _loginFormState.value = _loginFormState.value?.copy(email = email)
     }
 
     fun onPasswordChange(password: String) {
-        val currentState = _loginFormState.value ?: LoginFormState()
-        _loginFormState.value = currentState.copy(password = password)
+        _passwordError.value = null  // Clear previous errors
+        _loginFormState.value = _loginFormState.value?.copy(password = password)
     }
 
     fun togglePasswordVisibility() {
@@ -40,27 +46,28 @@ class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
     fun login(context: Context) {
         val email = _loginFormState.value?.email.orEmpty()
         val password = _loginFormState.value?.password.orEmpty()
-
         if (email.isNotEmpty() && password.isNotEmpty()) {
             _isLoading.value = true
             viewModelScope.launch {
                 try {
                     val response = userRepository.loginUser(email, password)
-                    if (response.isSuccessful && response.body()?.success == true) {
-                        val user = response.body()?.user
-                        val token = response.body()?.token
-                        if (user != null && token != null) {
-                            val userModel = UserModel(user.email ?: "", token, true)
-                            userRepository.saveSession(userModel)
-                            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                            navigateToMain(context)
+                    if (response.isSuccessful) {
+                        response.body()?.let { body ->
+                            if (body.success == true) {
+                                val userEmail = body.user?.email ?: "Unknown Email" // Handling null
+                                val userToken = body.token ?: "Unknown Token" // Handling null
+                                userRepository.saveSession(UserModel(userEmail, userToken, true))
+                                navigateToMain(context)
+                            } else {
+                                handleLoginError(body.message)
+                            }
                         }
                     } else {
-                        Toast.makeText(context, "Login Failed: ${response.body()?.message}", Toast.LENGTH_SHORT).show()
-                        Log.e("LoginError", "Error: ${response.body()?.message}")
+                        val errorMessage = userRepository.parseErrorResponse(response)
+                        handleLoginError(errorMessage)
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Login Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    _passwordError.postValue("Login Failed: ${e.localizedMessage ?: "Unknown error"}")
                     Log.e("LoginError", "Exception: ${e.message}")
                 } finally {
                     _isLoading.value = false
@@ -68,6 +75,20 @@ class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
             }
         } else {
             Toast.makeText(context, "Email and Password cannot be empty", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleLoginError(errorMessage: String?) {
+        if (errorMessage != null) {
+            if (errorMessage.contains("user not found", ignoreCase = true)) {
+                _emailError.postValue(errorMessage)
+            } else if (errorMessage.contains("invalid password", ignoreCase = true)) {
+                _passwordError.postValue(errorMessage)
+            } else {
+                _passwordError.postValue(errorMessage)
+            }
+        } else {
+            _passwordError.postValue("Login failed: Unknown error occurred")
         }
     }
 
@@ -81,3 +102,4 @@ class LoginViewModel(private val userRepository: UserRepository) : ViewModel() {
         context.startActivity(intent)
     }
 }
+

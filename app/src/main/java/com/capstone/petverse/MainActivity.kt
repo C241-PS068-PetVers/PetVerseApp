@@ -122,7 +122,7 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
 
             NavHost(navController, startDestination = Screen.Home.route) {
                 composable(Screen.Home.route) {
-                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application, context)
+                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     HomeScreen(viewModel = uploadPostViewModel)
                 }
@@ -137,7 +137,7 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                     }
                 }
                 composable(Screen.Upload.route) {
-                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application, context)
+                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     UploadPostScreen(navController, uploadPostViewModel)
                 }
