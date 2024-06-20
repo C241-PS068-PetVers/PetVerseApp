@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,24 +37,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import coil.transform.RoundedCornersTransformation
 import com.capstone.petverse.R
 import com.capstone.petverse.ui.model.PostUser
-import com.capstone.petverse.ui.viewmodel.UploadPostViewModel
+import com.capstone.petverse.ui.viewmodel.ProfileViewModel
 
 @Composable
-fun CardPost(
+fun ProfileCardPost(
     post: PostUser,
-    viewModel: UploadPostViewModel,
+    viewModel: ProfileViewModel,
+    navController: NavController,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val isInPreview = LocalInspectionMode.current
-    var isLiked by remember { mutableStateOf(post.likes.contains(viewModel.userSession.value?.email)) }
+    val userSession by viewModel.userProfile.collectAsState()
+
+    var isLiked by remember { mutableStateOf(post.likes.contains(userSession?.email)) }
     var likesCount by remember { mutableStateOf(post.likes.size) }
+
     val painterProfile: Painter = if (isInPreview) {
         painterResource(id = R.drawable.account_circle_24)
     } else {
@@ -67,7 +73,6 @@ fun CardPost(
                 .build()
         )
     }
-
 
     val painterPost: Painter = if (isInPreview) {
         painterResource(id = R.drawable.account_circle_24)
@@ -85,7 +90,10 @@ fun CardPost(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(2.dp, Color.Gray, RoundedCornerShape(8.dp)),
+            .border(2.dp, Color.Gray, RoundedCornerShape(8.dp))
+            .clickable {
+                navController.navigate("post_list_screen/${post.category}/${post.id}")
+            },
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,

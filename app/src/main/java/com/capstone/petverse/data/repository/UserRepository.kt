@@ -1,14 +1,20 @@
 package com.capstone.petverse.data.repository
 
 import android.graphics.Bitmap
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import com.capstone.petverse.data.model.UserModel
 import com.capstone.petverse.data.pref.UserPreference
 import com.capstone.petverse.data.remote.ApiService
+import com.capstone.petverse.data.response.LikeHistoryResponse
 import com.capstone.petverse.data.response.LoginResponse
 import com.capstone.petverse.data.response.PostResponse
 import com.capstone.petverse.data.response.SignupResponse
 import com.capstone.petverse.data.response.UserProfileResponse
+import com.capstone.petverse.ui.model.PostUser
 import com.google.gson.Gson
+import java.util.*
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -94,6 +100,50 @@ class UserRepository private constructor(
 
     suspend fun getUserProfile(token: String): Response<UserProfileResponse> {
         return apiService.getUserProfile(token)
+    }
+
+//    suspend fun getLikedPosts(token: String): Response<LikeHistoryResponse> {
+//        return apiService.getLikedPosts("Bearer $token")
+//    }
+    suspend fun getLikedPosts(token: String): Response<List<PostUser>> {
+        val response = apiService.getLikedPosts("Bearer $token")
+        return if (response.isSuccessful) {
+            val likedPosts = response.body()?.posts?.map { postItemLike ->
+                PostUser(
+                    id = postItemLike?.id ?: "",
+                    imageUrl = postItemLike?.imageUrl ?: "",
+                    description = postItemLike?.description ?: "",
+                    authorName = postItemLike?.authorName ?: "",
+                    authorProfilePicture = postItemLike?.authorProfilePicture,
+                    likes = postItemLike?.likes?.filterNotNull() ?: emptyList(),
+                    category = postItemLike?.category ?: "",
+                    phoneNumber = postItemLike?.phoneNumber
+                )
+            } ?: emptyList()
+            Response.success(likedPosts)
+        } else {
+            Response.error(response.code(), response.errorBody()!!)
+        }
+    }
+
+
+
+    suspend fun updateUserProfile(name: String, username: String, bitmap: Bitmap?, token: String): Response<UserProfileResponse> {
+        val namePart = name.toRequestBody("text/plain".toMediaTypeOrNull())
+        val usernamePart = username.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val profilePicturePart = bitmap?.let {
+            val stream = ByteArrayOutputStream()
+            it.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+            val requestBody = stream.toByteArray().toRequestBody("image/jpeg".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("profilePicture", "image.jpg", requestBody)
+        }
+
+        return apiService.updateUserProfile("Bearer $token", namePart, usernamePart, profilePicturePart)
+    }
+
+    suspend fun getPostsByCategory(token: String, category: String): Response<List<PostResponse>> {
+        return apiService.getPostsByCategory(token, category)
     }
 
     companion object {

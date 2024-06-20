@@ -1,14 +1,15 @@
 package com.capstone.petverse.ui.activity
 
 import android.app.Application
-import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -39,6 +40,7 @@ import com.capstone.petverse.R
 import com.capstone.petverse.data.pref.UserPreference
 import com.capstone.petverse.data.pref.dataStore
 import com.capstone.petverse.data.response.UserProfile
+import com.capstone.petverse.ui.model.PostUser
 import com.capstone.petverse.ui.viewmodel.ProfileViewModel
 import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 import kotlinx.coroutines.flow.collect
@@ -52,11 +54,13 @@ fun ProfileScreen(navController: NavController) {
 
     val userPreference = UserPreference.getInstance(context.dataStore)
     val userProfile by profileViewModel.userProfile.collectAsState()
+    val posts by profileViewModel.posts.collectAsState()
 
     LaunchedEffect(Unit) {
         userPreference.getSession().collect { user ->
             if (user.isLogin) {
                 profileViewModel.fetchUserProfile("Bearer ${user.token}")
+                profileViewModel.fetchPostsByCategory("Bearer ${user.token}", "post")  // Default to "post" category
             }
         }
     }
@@ -71,11 +75,13 @@ fun ProfileScreen(navController: NavController) {
                     .background(Color.White),
                 navController = navController,
                 profileViewModel = profileViewModel,
-                userProfile = userProfile
+                userProfile = userProfile,
+                posts = posts
             )
         }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,7 +105,8 @@ fun BodyContent(
     modifier: Modifier = Modifier,
     navController: NavController,
     profileViewModel: ProfileViewModel,
-    userProfile: UserProfile?
+    userProfile: UserProfile?,
+    posts: List<PostUser>
 ) {
     Column(
         modifier = modifier
@@ -108,8 +115,6 @@ fun BodyContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ProfileSection(userProfile)
-        Spacer(modifier = Modifier.height(8.dp))
-        ProfileStats()
         Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = { navController.navigate("edit_profile") },
@@ -128,7 +133,7 @@ fun BodyContent(
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        ProfileTab(profileViewModel)
+        ProfileTab(profileViewModel, posts, navController)
     }
 }
 
@@ -154,34 +159,6 @@ fun ProfileSection(userProfile: UserProfile?) {
 }
 
 @Composable
-fun ProfileStats() {
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        ProfileStatItem(value = "300", label = "Followers")
-        VerticalDivider(
-            color = Color.Gray,
-            modifier = Modifier
-                .height(40.dp)
-                .width(1.dp)
-                .align(Alignment.CenterVertically)
-        )
-        ProfileStatItem(value = "200", label = "Following")
-        VerticalDivider(
-            color = Color.Gray,
-            modifier = Modifier
-                .height(40.dp)
-                .width(1.dp)
-                .align(Alignment.CenterVertically)
-        )
-        ProfileStatItem(value = "60", label = "Likes")
-    }
-}
-
-@Composable
 fun ProfileStatItem(value: String, label: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -193,7 +170,7 @@ fun ProfileStatItem(value: String, label: String) {
 }
 
 @Composable
-fun ProfileTab(profileViewModel: ProfileViewModel) {
+fun ProfileTab(profileViewModel: ProfileViewModel, posts: List<PostUser>, navController: NavController) {
     val selectedTabIndex by profileViewModel.selectedTabIndex.collectAsState()
 
     TabRow(
@@ -237,7 +214,7 @@ fun ProfileTab(profileViewModel: ProfileViewModel) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.home_outlined),
+                    painter = painterResource(id = R.drawable.icon_placeholder),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
@@ -249,7 +226,6 @@ fun ProfileTab(profileViewModel: ProfileViewModel) {
 
     AnimatedContent(
         targetState = selectedTabIndex,
-        label = "ProfileTabs",
         transitionSpec = {
             if (targetState > initialState) {
                 slideInHorizontally { width -> width } + fadeIn(tween(300)) togetherWith
@@ -259,55 +235,53 @@ fun ProfileTab(profileViewModel: ProfileViewModel) {
                         slideOutHorizontally { width -> width } + fadeOut(tween(300))
             }.using(SizeTransform(false))
         }
-    ) { index ->
-        when (index) {
-            0 -> ContentPost(profileViewModel.photos)
-            1 -> AdoptionPost(profileViewModel.photos)
+    ) { targetState ->
+        when (targetState) {
+            0 -> PostGrid(posts = posts, navController = navController, profileViewModel = profileViewModel)
+            1 -> PostGrid(posts = posts, navController = navController, profileViewModel = profileViewModel)
         }
     }
 }
 
 @Composable
-fun ContentPost(photos: List<Int>) {
+fun PostGrid(posts: List<PostUser>, navController: NavController, profileViewModel: ProfileViewModel) {
+    val context = LocalContext.current
+    val userPreference = UserPreference.getInstance(context.dataStore)
+
+    val tokenState = remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        userPreference.getSession().collect { user ->
+            if (user.isLogin) {
+                tokenState.value = "Bearer ${user.token}"
+                Log.d("PostGrid", "User token: ${tokenState.value}")
+            }
+        }
+    }
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(4.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(photos.size) { index ->
+        items(posts.size) { index ->
+            val post = posts[index]
             Image(
-                painter = painterResource(id = photos[index]),
+                painter = rememberImagePainter(post.imageUrl),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(4.dp)
                     .size(100.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        //
+                    },
                 contentScale = ContentScale.Crop
             )
         }
     }
 }
 
-@Composable
-fun AdoptionPost(photos: List<Int>) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        contentPadding = PaddingValues(4.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(photos.size) { index ->
-            Image(
-                painter = painterResource(id = photos[index]),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(4.dp)
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

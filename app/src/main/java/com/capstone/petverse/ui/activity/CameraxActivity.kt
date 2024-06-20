@@ -7,22 +7,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,11 +35,10 @@ fun CameraPreviewScreen(navController: NavHostController) {
     val previewView = remember { PreviewView(context) }
 
     val imageCapture = viewModel.imageCapture.value
+    val pickedImageUri by viewModel.pickedImageUri.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
-        imageCapture?.let {
-            viewModel.initCamera(context, lifecycleOwner, previewView, CameraSelector.LENS_FACING_BACK)
-        }
+        viewModel.initCamera(context, lifecycleOwner, previewView, CameraSelector.LENS_FACING_BACK)
     }
 
     // Handle back button press
@@ -58,6 +49,13 @@ fun CameraPreviewScreen(navController: NavHostController) {
     // Launcher for picking images from the gallery
     val imagePickerLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { viewModel.setPickedImageUri(it) }
+    }
+
+    // Navigate to DetectionActivity if an image is captured or picked
+    LaunchedEffect(pickedImageUri) {
+        pickedImageUri?.let {
+            navController.navigate("detection")
+        }
     }
 
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
@@ -93,3 +91,4 @@ fun CameraPreviewScreen(navController: NavHostController) {
         }
     }
 }
+

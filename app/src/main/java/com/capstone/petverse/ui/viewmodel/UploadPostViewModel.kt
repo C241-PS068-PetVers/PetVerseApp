@@ -65,6 +65,7 @@ class UploadPostViewModel(application: Application, private val userRepository: 
     fun onSubmitPost(navController: NavController) {
         viewModelScope.launch {
             userSession.value?.let { user ->
+                Log.d("UploadPostViewModel", "Submitting post...")
                 val token = user.token
                 val postResponse = userRepository.createPost(
                     description.value,
@@ -74,11 +75,16 @@ class UploadPostViewModel(application: Application, private val userRepository: 
                     if (selectedCategory.value == "adoption") phoneNumber.value else null
                 )
                 if (postResponse.isSuccessful) {
+                    Log.d("UploadPostViewModel", "Post submitted successfully.")
                     fetchPosts()
                     navController.popBackStack()  // Navigate back on successful post
                 } else {
                     // Handle error
+                    val errorBody = postResponse.errorBody()?.string()
+                    Log.e("UploadPostViewModel", "Failed to submit post: $errorBody")
                 }
+            } ?: run {
+                Log.e("UploadPostViewModel", "User session is null.")
             }
         }
     }
@@ -113,8 +119,8 @@ class UploadPostViewModel(application: Application, private val userRepository: 
             category = post.category ?: "",
             likes = post.likes?.map { it ?: "" } ?: emptyList(),
             commentsCount = 0,
-            phoneNumber = post.phoneNumber
-
+            phoneNumber = post.phoneNumber,
+            authorProfilePicture = post.authorProfilePicture
         )
     }
 

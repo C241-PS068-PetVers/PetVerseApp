@@ -1,13 +1,16 @@
 package com.capstone.petverse.ui.activity
 
-import android.content.Intent
+import android.app.Application
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -30,9 +34,17 @@ import coil.compose.AsyncImage
 import com.capstone.petverse.R
 import com.capstone.petverse.ui.theme.PetVerseTheme
 import com.capstone.petverse.ui.viewmodel.EditProfileViewModel
-
+import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 @Composable
-fun EditProfileScreen(navController: NavController, editProfileViewModel: EditProfileViewModel = viewModel()) {
+fun EditProfileScreen(navController: NavController) {
+    val context = LocalContext.current.applicationContext as Application
+    val factory = ViewModelFactory.getInstance(context)
+    val editProfileViewModel: EditProfileViewModel = viewModel(factory = factory)
+
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+        editProfileViewModel.setImageUri(uri)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,34 +55,24 @@ fun EditProfileScreen(navController: NavController, editProfileViewModel: EditPr
         content = { paddingValues ->
             EditProfileContent(
                 modifier = Modifier.padding(paddingValues),
-                editProfileViewModel = editProfileViewModel
+                editProfileViewModel = editProfileViewModel,
+                onChangeProfilePictureClick = { launcher.launch("image/*") },
+                navController = navController
             )
         }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(title: String, onBackClick: () -> Unit) {
-    TopAppBar(
-        title = { Text(title) },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = Color.White,
-            navigationIconContentColor = Color.White
-        )
-    )
-}
-
-@Composable
-fun EditProfileContent(modifier: Modifier = Modifier, editProfileViewModel: EditProfileViewModel) {
+fun EditProfileContent(
+    modifier: Modifier = Modifier,
+    editProfileViewModel: EditProfileViewModel,
+    onChangeProfilePictureClick: () -> Unit,
+    navController: NavController
+) {
     val name by editProfileViewModel.name.collectAsState()
     val username by editProfileViewModel.username.collectAsState()
+    val imageUri by editProfileViewModel.imageUri.collectAsState()
 
     Column(
         modifier = modifier
@@ -80,19 +82,19 @@ fun EditProfileContent(modifier: Modifier = Modifier, editProfileViewModel: Edit
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         AsyncImage(
-            model = "https://via.placeholder.com/150",
+            model = imageUri ?: "https://via.placeholder.com/150",
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .clickable { /* TODO: Handle profile picture change */ },
+                .clickable { onChangeProfilePictureClick() },
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Change profile picture",
             color = colorResource(id = R.color.colorPrimary),
-            modifier = Modifier.clickable { /* TODO: Handle profile picture change */ }
+            modifier = Modifier.clickable { onChangeProfilePictureClick() }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -156,7 +158,7 @@ fun EditProfileContent(modifier: Modifier = Modifier, editProfileViewModel: Edit
 
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { /* TODO: Handle update profile */ },
+            onClick = { editProfileViewModel.updateProfile(navController) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -173,11 +175,3 @@ fun EditProfileContent(modifier: Modifier = Modifier, editProfileViewModel: Edit
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewEditProfileScreen() {
-    PetVerseTheme {
-        val navController = rememberNavController()
-        EditProfileScreen(navController = navController)
-    }
-}

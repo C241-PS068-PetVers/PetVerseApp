@@ -221,6 +221,17 @@ class LoginActivity : ComponentActivity() {
                                 color = colorResource(id = R.color.colorPrimaryDark)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
+
+                            Text(
+                                text = stringResource(R.string.signup),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                fontFamily = interFamily,
+                                color = colorResource(id = R.color.colorPrimary),
+                                modifier = Modifier.clickable {
+                                    viewModel.navigateToSignup(context)
+                                }
+                            )
                         }
                     }
                 }
