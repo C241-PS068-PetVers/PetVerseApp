@@ -1,7 +1,6 @@
 package com.capstone.petverse.ui.activity
 
 import android.app.Application
-import android.content.Context
 import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -28,12 +27,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.capstone.petverse.R
 import com.capstone.petverse.data.pref.UserPreference
@@ -41,8 +38,6 @@ import com.capstone.petverse.data.pref.dataStore
 import com.capstone.petverse.data.response.UserProfile
 import com.capstone.petverse.ui.viewmodel.ProfileViewModel
 import com.capstone.petverse.ui.viewmodel.ViewModelFactory
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(navController: NavController) {
@@ -161,15 +156,7 @@ fun ProfileStats() {
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        ProfileStatItem(value = "300", label = "Followers")
-        VerticalDivider(
-            color = Color.Gray,
-            modifier = Modifier
-                .height(40.dp)
-                .width(1.dp)
-                .align(Alignment.CenterVertically)
-        )
-        ProfileStatItem(value = "200", label = "Following")
+        ProfileStatItem(value = "200", label = "Post")
         VerticalDivider(
             color = Color.Gray,
             modifier = Modifier
@@ -307,11 +294,4 @@ fun AdoptionPost(photos: List<Int>) {
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewProfileScreen() {
-    val navController = rememberNavController()
-    ProfileScreen(navController = navController)
 }
