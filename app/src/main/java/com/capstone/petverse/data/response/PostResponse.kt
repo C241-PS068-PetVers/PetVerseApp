@@ -25,7 +25,10 @@ data class PostResponse(
 	val category: String? = null,
 
 	@SerializedName("likes")
-	val likes: List<String?>? = null
+	val likes: List<String?>? = null,
+
+	@SerializedName("authorProfilePicture")
+	val authorProfilePicture: String? = null
 )
 
 data class CreatedAt(

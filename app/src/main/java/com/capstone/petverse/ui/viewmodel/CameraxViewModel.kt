@@ -14,13 +14,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -29,8 +29,10 @@ class CameraxViewModel : ViewModel() {
     private val _imageCapture = mutableStateOf<ImageCapture?>(null)
     val imageCapture: State<ImageCapture?> = _imageCapture
 
-    private val _pickedImageUri = mutableStateOf<Uri?>(null)
-    val pickedImageUri: State<Uri?> = _pickedImageUri
+    private val _pickedImageUri = MutableStateFlow<Uri?>(null)
+    val pickedImageUri: StateFlow<Uri?> = _pickedImageUri
+
+    val capturedImageUri = mutableStateOf<Uri?>(null)
 
     init {
         initializeImageCapture()
@@ -40,7 +42,7 @@ class CameraxViewModel : ViewModel() {
         _imageCapture.value = ImageCapture.Builder().build()
     }
 
-    fun captureImage(imageCapture: ImageCapture, context: Context) {
+    fun captureImage(imageCapture: ImageCapture?, context: Context) {
         val name = "CameraxImage.jpeg"
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
@@ -56,34 +58,54 @@ class CameraxViewModel : ViewModel() {
             contentValues
         ).build()
 
-        imageCapture.takePicture(
+        imageCapture?.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(context),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     Log.d("CameraPreview", "Image saved successfully")
-                    // Update state or handle success
+                    _pickedImageUri.value = outputFileResults.savedUri
                 }
 
                 override fun onError(exception: ImageCaptureException) {
                     Log.e("CameraPreview", "Image capture failed", exception)
-                    // Handle error
                 }
             })
+    }
+
+    fun createImageUri(context: Context): Uri? {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "temp_image")
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
+            }
+        }
+        return context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
     }
 
     fun initCamera(context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView, lensFacing: Int) {
         viewModelScope.launch {
             try {
-                val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+                val cameraProvider = context.getCameraProvider()
                 val preview = Preview.Builder().build()
                 val imageCapture = ImageCapture.Builder().build()
 
-                val cameraProvider = context.getCameraProvider()
+                val cameraSelector = CameraSelector.Builder()
+                    .requireLensFacing(lensFacing)
+                    .build()
+
                 cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageCapture
+                )
+
+                _imageCapture.value = imageCapture
 
                 preview.setSurfaceProvider(previewView.surfaceProvider)
-                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
             } catch (e: Exception) {
                 Log.e("CameraPreview", "Camera binding failed", e)
             }

@@ -38,13 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.capstone.petverse.data.pref.UserPreference
 import com.capstone.petverse.data.pref.dataStore
 import com.capstone.petverse.ui.activity.CameraPreviewScreen
+import com.capstone.petverse.ui.activity.DetectionScreen
 import com.capstone.petverse.ui.activity.EditProfileScreen
 import com.capstone.petverse.ui.activity.HomeScreen
 import com.capstone.petverse.ui.activity.LikeHistoryActivity
@@ -52,10 +55,14 @@ import com.capstone.petverse.ui.activity.ProfileScreen
 import com.capstone.petverse.ui.activity.SearchResultScreen
 import com.capstone.petverse.ui.activity.UploadPostScreen
 import com.capstone.petverse.ui.activity.WelcomeActivity
+import com.capstone.petverse.ui.activity.PostListScreen
+import com.capstone.petverse.ui.activity.ResultActivity
 import com.capstone.petverse.ui.components.Search
 import com.capstone.petverse.ui.model.BottomBarItem
 import com.capstone.petverse.ui.model.Screen
 import com.capstone.petverse.ui.theme.PetVerseTheme
+import com.capstone.petverse.ui.viewmodel.ProfileViewModel
+import com.capstone.petverse.ui.viewmodel.ResultViewModel
 import com.capstone.petverse.ui.viewmodel.UploadPostViewModel
 import com.capstone.petverse.ui.viewmodel.ViewModelFactory
 import kotlinx.coroutines.flow.first
@@ -89,7 +96,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxSize(),
                             color = MaterialTheme.colorScheme.background
                         ) {
-                            PetVerseApp(isCameraPermissionGranted)
+                            PetVerseApp(isCameraPermissionGranted, session.token)
                         }
                     }
                 }
@@ -103,11 +110,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifier) {
+fun PetVerseApp(isCameraPermissionGranted: Boolean, token: String, modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
+    val factory = ViewModelFactory.getInstance(context.applicationContext as Application)
+    val profileViewModel: ProfileViewModel = viewModel(factory = factory)
+    val resultViewModel: ResultViewModel = viewModel(factory = factory)
 
     Scaffold(
         bottomBar = { if (currentRoute != Screen.EditProfile.route) BottomBar(navController) }
@@ -117,13 +127,12 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                 .padding(innerPadding)
                 .background(Color.White)
         ) {
-            if (currentRoute != Screen.Profile.route && currentRoute != Screen.Upload.route && currentRoute != Screen.EditProfile.route) {
+            if (currentRoute != Screen.Profile.route && currentRoute != Screen.Upload.route && currentRoute != Screen.EditProfile.route && currentRoute != Screen.Favorite.route && currentRoute != Screen.Detection.route && currentRoute != "result") {
                 Search(navController = navController, modifier = Modifier.padding(5.dp))
             }
 
             NavHost(navController, startDestination = Screen.Home.route) {
                 composable(Screen.Home.route) {
-                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     HomeScreen(viewModel = uploadPostViewModel)
                 }
@@ -137,8 +146,13 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                         Toast.makeText(context, "Camera permission is required to use this feature", Toast.LENGTH_LONG).show()
                     }
                 }
+                composable("cameraPreview") {
+                    CameraPreviewScreen(navController)
+                }
+                composable("detection") { DetectionScreen(navController = navController, resultViewModel = resultViewModel) }
+                composable("result") { ResultActivity(navController = navController, viewModel = resultViewModel) }
+
                 composable(Screen.Upload.route) {
-                    val factory = ViewModelFactory.getInstance(context.applicationContext as Application)
                     val uploadPostViewModel: UploadPostViewModel = viewModel(factory = factory)
                     UploadPostScreen(navController, uploadPostViewModel)
                 }
@@ -154,6 +168,21 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                 composable("search_result/{query}") { backStackEntry ->
                     val query = backStackEntry.arguments?.getString("query") ?: ""
                     SearchResultScreen(navController = navController, query = query)
+                }
+                composable(
+                    "post_list_screen/{category}/{postId}?token={token}",
+                    arguments = listOf(
+                        navArgument("category") { type = NavType.StringType },
+                        navArgument("postId") { type = NavType.StringType },
+                        navArgument("token") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val category = backStackEntry.arguments?.getString("category")
+                    val postId = backStackEntry.arguments?.getString("postId")
+                    val token = backStackEntry.arguments?.getString("token")
+                    if (category != null && postId != null && token != null) {
+                        PostListScreen(navController, category, postId, profileViewModel, token)
+                    }
                 }
             }
         }

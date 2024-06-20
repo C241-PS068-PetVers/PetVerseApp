@@ -1,5 +1,7 @@
 package com.capstone.petverse.data.remote
 
+import com.capstone.petverse.data.response.DetectionResponse
+import com.capstone.petverse.data.response.LikeHistoryResponse
 import com.capstone.petverse.data.response.LoginResponse
 import com.capstone.petverse.data.response.PostResponse
 import com.capstone.petverse.data.response.SignupResponse
@@ -55,4 +57,26 @@ interface ApiService {
     suspend fun getUserProfile(
         @Header("Authorization") token: String
     ): Response<UserProfileResponse>
+
+    @Multipart
+    @PUT("api/user/profile")
+    suspend fun updateUserProfile(
+        @Header("Authorization") token: String,
+        @Part("name") name: RequestBody,
+        @Part("username") username: RequestBody,
+        @Part profilePicture: MultipartBody.Part?
+    ): Response<UserProfileResponse>
+
+    @GET("/api/posts/likedPost")
+    suspend fun getLikedPosts(
+        @Header("Authorization") token: String
+    ): Response<LikeHistoryResponse>
+
+
+    @GET("/api/posts/getPost")
+    suspend fun getPostsByCategory(
+        @Header("Authorization") token: String,
+        @Query("category") category: String
+    ): Response<List<PostResponse>>
+
 }

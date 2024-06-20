@@ -181,4 +181,3 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
         }
     }
 }
-
