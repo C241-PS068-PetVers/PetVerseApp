@@ -52,6 +52,7 @@ import com.capstone.petverse.ui.activity.EditProfileScreen
 import com.capstone.petverse.ui.activity.HomeScreen
 import com.capstone.petverse.ui.activity.LikeHistoryActivity
 import com.capstone.petverse.ui.activity.ProfileScreen
+import com.capstone.petverse.ui.activity.SearchResultScreen
 import com.capstone.petverse.ui.activity.UploadPostScreen
 import com.capstone.petverse.ui.activity.WelcomeActivity
 import com.capstone.petverse.ui.activity.PostListScreen
@@ -127,7 +128,7 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, token: String, modifier: Mod
                 .background(Color.White)
         ) {
             if (currentRoute != Screen.Profile.route && currentRoute != Screen.Upload.route && currentRoute != Screen.EditProfile.route && currentRoute != Screen.Favorite.route && currentRoute != Screen.Detection.route && currentRoute != "result") {
-                Search(modifier = Modifier.padding(5.dp))
+                Search(navController = navController, modifier = Modifier.padding(5.dp))
             }
 
             NavHost(navController, startDestination = Screen.Home.route) {
@@ -161,6 +162,13 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, token: String, modifier: Mod
                 composable(Screen.EditProfile.route) {
                     EditProfileScreen(navController)
                 }
+                composable("search") {
+                    Search(navController)
+                }
+                composable("search_result/{query}") { backStackEntry ->
+                    val query = backStackEntry.arguments?.getString("query") ?: ""
+                    SearchResultScreen(navController = navController, query = query)
+                }
                 composable(
                     "post_list_screen/{category}/{postId}?token={token}",
                     arguments = listOf(
@@ -176,14 +184,10 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, token: String, modifier: Mod
                         PostListScreen(navController, category, postId, profileViewModel, token)
                     }
                 }
-
             }
         }
     }
 }
-
-
-
 
 @Composable
 fun BottomBar(
