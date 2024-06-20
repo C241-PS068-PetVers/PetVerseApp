@@ -49,6 +49,7 @@ import com.capstone.petverse.ui.activity.EditProfileScreen
 import com.capstone.petverse.ui.activity.HomeScreen
 import com.capstone.petverse.ui.activity.LikeHistoryActivity
 import com.capstone.petverse.ui.activity.ProfileScreen
+import com.capstone.petverse.ui.activity.SearchResultScreen
 import com.capstone.petverse.ui.activity.UploadPostScreen
 import com.capstone.petverse.ui.activity.WelcomeActivity
 import com.capstone.petverse.ui.components.Search
@@ -117,7 +118,7 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                 .background(Color.White)
         ) {
             if (currentRoute != Screen.Profile.route && currentRoute != Screen.Upload.route && currentRoute != Screen.EditProfile.route) {
-                Search(modifier = Modifier.padding(5.dp))
+                Search(navController = navController, modifier = Modifier.padding(5.dp))
             }
 
             NavHost(navController, startDestination = Screen.Home.route) {
@@ -146,6 +147,13 @@ fun PetVerseApp(isCameraPermissionGranted: Boolean, modifier: Modifier = Modifie
                 }
                 composable(Screen.EditProfile.route) {
                     EditProfileScreen(navController)
+                }
+                composable("search") {
+                    Search(navController)
+                }
+                composable("search_result/{query}") { backStackEntry ->
+                    val query = backStackEntry.arguments?.getString("query") ?: ""
+                    SearchResultScreen(navController = navController, query = query)
                 }
             }
         }
