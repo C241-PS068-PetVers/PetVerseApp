@@ -20,6 +20,9 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
 
+    private val _profilePictureUrl = MutableStateFlow<String?>(null)
+    val profilePictureUrl: StateFlow<String?> = _profilePictureUrl.asStateFlow()
+
     private val _posts = MutableStateFlow<List<PostUser>>(emptyList())
     val posts: StateFlow<List<PostUser>> = _posts.asStateFlow()
 
@@ -37,7 +40,10 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
         viewModelScope.launch {
             val response = userRepository.getUserProfile(token)
             if (response.isSuccessful) {
-                _userProfile.value = response.body()?.user
+                val updatedProfile = response.body()?.user
+                _userProfile.value = updatedProfile
+                _profilePictureUrl.value = updatedProfile?.profilePicture
+                updatedProfile?.profilePicture?.let { updatePostsWithNewProfilePicture(it) }
                 fetchPostsByCategory("post", token)
             }
         }
@@ -48,12 +54,23 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
             Log.d("ProfileViewModel", "Fetching posts for category: $category with token: $token")
             val response = userRepository.getPostsByCategory(token, category)
             if (response.isSuccessful) {
-                _posts.value = response.body()?.filter { it.authorName == _userProfile.value?.username }
-                    ?.map { mapPostResponseToPostUser(it) } ?: emptyList()
-                // Log the number of posts fetched
+                val posts = response.body()
+                    ?.map { mapPostResponseToPostUser(it) }
+                    ?.filter { it.authorName == _userProfile.value?.username } ?: emptyList()
+                _posts.value = posts
                 Log.d("ProfileViewModel", "Fetched ${_posts.value.size} posts")
             } else {
                 Log.e("ProfileViewModel", "Failed to fetch posts: ${response.errorBody()?.string()}")
+            }
+        }
+    }
+
+    private fun updatePostsWithNewProfilePicture(newProfilePictureUrl: String) {
+        _posts.value = _posts.value.map { post ->
+            if (post.authorName == _userProfile.value?.username) {
+                post.copy(authorProfilePicture = newProfilePictureUrl)
+            } else {
+                post
             }
         }
     }
