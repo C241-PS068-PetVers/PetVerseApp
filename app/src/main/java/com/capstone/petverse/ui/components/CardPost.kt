@@ -57,17 +57,15 @@ fun CardPost(
     val painterProfile: Painter = if (isInPreview) {
         painterResource(id = R.drawable.account_circle_24)
     } else {
-        val profilePictureUrl = post.authorProfilePicture ?: R.drawable.account_circle_24
         rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(profilePictureUrl)
+                .data(post.authorProfilePicture)
                 .size(Size.ORIGINAL)
                 .crossfade(true)
                 .transformations(RoundedCornersTransformation(8f))
                 .build()
         )
     }
-
 
     val painterPost: Painter = if (isInPreview) {
         painterResource(id = R.drawable.account_circle_24)
