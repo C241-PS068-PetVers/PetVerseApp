@@ -62,13 +62,13 @@ class LikeHistoryViewModel(application: Application, private val userRepository:
         }
     }
 
-    private fun updateLocalPostLikeStatus(postId: String, userEmail: String, isLiked: Boolean) {
+    private fun updateLocalPostLikeStatus(postId: String, email: String, isLiked: Boolean) {
         _likedPosts.value = _likedPosts.value.map { post ->
             if (post.id == postId) {
                 val updatedLikes = if (isLiked) {
-                    post.likes + userEmail
+                    post.likes + email
                 } else {
-                    post.likes - userEmail
+                    post.likes - email
                 }
                 post.copy(likes = updatedLikes)
             } else {

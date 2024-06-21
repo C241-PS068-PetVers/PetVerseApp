@@ -20,6 +20,9 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
 
+    private val _profilePictureUrl = MutableStateFlow<String?>(null)
+    val profilePictureUrl: StateFlow<String?> = _profilePictureUrl.asStateFlow()
+
     private val _posts = MutableStateFlow<List<PostUser>>(emptyList())
     val posts: StateFlow<List<PostUser>> = _posts.asStateFlow()
 
@@ -37,23 +40,21 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
         viewModelScope.launch {
             val response = userRepository.getUserProfile(token)
             if (response.isSuccessful) {
-                _userProfile.value = response.body()?.user
+                val updatedProfile = response.body()?.user
+                _userProfile.value = updatedProfile
+                _profilePictureUrl.value = updatedProfile?.profilePicture
+                updatedProfile?.profilePicture?.let { updatePostsWithNewProfilePicture(it) }
                 fetchPostsByCategory("post", token)
             }
         }
     }
 
-    fun fetchPostsByCategory(category: String, token: String) {
-        viewModelScope.launch {
-            Log.d("ProfileViewModel", "Fetching posts for category: $category with token: $token")
-            val response = userRepository.getPostsByCategory(token, category)
-            if (response.isSuccessful) {
-                _posts.value = response.body()?.filter { it.authorName == _userProfile.value?.username }
-                    ?.map { mapPostResponseToPostUser(it) } ?: emptyList()
-                // Log the number of posts fetched
-                Log.d("ProfileViewModel", "Fetched ${_posts.value.size} posts")
+    private fun updatePostsWithNewProfilePicture(newProfilePictureUrl: String) {
+        _posts.value = _posts.value.map { post ->
+            if (post.username == _userProfile.value?.username) {
+                post.copy(profilePicture = newProfilePictureUrl)
             } else {
-                Log.e("ProfileViewModel", "Failed to fetch posts: ${response.errorBody()?.string()}")
+                post
             }
         }
     }
@@ -61,15 +62,32 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
     private fun mapPostResponseToPostUser(postResponse: PostResponse): PostUser {
         return PostUser(
             id = postResponse.id ?: "",
-            authorName = postResponse.authorName ?: "",
+            username = postResponse.username ?: "",
+            email = postResponse.email ?: "",
             imageUrl = postResponse.imageUrl ?: "",
             description = postResponse.description ?: "",
             category = postResponse.category ?: "",
             likes = postResponse.likes?.filterNotNull() ?: emptyList(),
             commentsCount = 0,
             phoneNumber = postResponse.phoneNumber,
-            authorProfilePicture = postResponse.authorProfilePicture
+            profilePicture = postResponse.profilePicture ?: ""
         )
+    }
+
+    fun fetchPostsByCategory(category: String, token: String) {
+        viewModelScope.launch {
+            Log.d("ProfileViewModel", "Fetching posts for category: $category with token: $token")
+            val response = userRepository.getPostsByCategory(token, category)
+            if (response.isSuccessful) {
+                val posts = response.body()
+                    ?.map { mapPostResponseToPostUser(it) }
+                    ?.filter { it.email == _userProfile.value?.email } ?: emptyList()
+                _posts.value = posts
+                Log.d("ProfileViewModel", "Fetched ${_posts.value.size} posts")
+            } else {
+                Log.e("ProfileViewModel", "Failed to fetch posts: ${response.errorBody()?.string()}")
+            }
+        }
     }
 
     fun likePost(postId: String) {
@@ -109,3 +127,4 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
         }
     }
 }
+

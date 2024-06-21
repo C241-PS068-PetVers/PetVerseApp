@@ -96,7 +96,6 @@ class EditProfileViewModel(application: Application, private val userRepository:
     fun updateProfile(navController: NavController) {
         viewModelScope.launch {
             if (userSession.value == null) {
-                // Handle null user session here
                 return@launch
             }
 

@@ -28,11 +28,14 @@ data class PostsItemLike(
 	@field:SerializedName("phoneNumber")
 	val phoneNumber: String? = null,
 
-	@field:SerializedName("authorName")
-	val authorName: String? = null,
+	@field:SerializedName("username")
+	val username: String? = null,
 
 	@field:SerializedName("imageUrl")
 	val imageUrl: String? = null,
+
+	@field:SerializedName("email")
+	val email: String? = null,
 
 	@field:SerializedName("description")
 	val description: String? = null,
@@ -43,8 +46,8 @@ data class PostsItemLike(
 	@field:SerializedName("category")
 	val category: String? = null,
 
-	@field:SerializedName("authorProfilePicture")
-	val authorProfilePicture: String? = null,
+	@field:SerializedName("profilePicture")
+	val profilePicture: String? = null,
 
 	@field:SerializedName("updatedAt")
 	val updatedAt: UpdatedAt? = null,

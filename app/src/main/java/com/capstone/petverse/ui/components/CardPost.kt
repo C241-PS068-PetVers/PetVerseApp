@@ -54,12 +54,13 @@ fun CardPost(
     val isInPreview = LocalInspectionMode.current
     var isLiked by remember { mutableStateOf(post.likes.contains(viewModel.userSession.value?.email)) }
     var likesCount by remember { mutableStateOf(post.likes.size) }
+
     val painterProfile: Painter = if (isInPreview) {
         painterResource(id = R.drawable.account_circle_24)
     } else {
         rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(post.authorProfilePicture)
+                .data(post.profilePicture ?: R.drawable.account_circle_24)
                 .size(Size.ORIGINAL)
                 .crossfade(true)
                 .transformations(RoundedCornersTransformation(8f))
@@ -102,7 +103,7 @@ fun CardPost(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = post.authorName,
+                    text = post.username,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
