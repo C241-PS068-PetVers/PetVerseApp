@@ -5,12 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowOutward
@@ -36,9 +31,8 @@ import com.capstone.petverse.R
 import com.capstone.petverse.data.pref.UserPreference
 import com.capstone.petverse.data.pref.dataStore
 import com.capstone.petverse.ui.activity.ui.theme.PetVerseTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
 
 class SettingsActivity : ComponentActivity() {
     private val interFamily = FontFamily(
@@ -51,7 +45,7 @@ class SettingsActivity : ComponentActivity() {
         setContent {
             PetVerseTheme {
                 SettingsScreen(interFamily = interFamily) {
-                    finish()  // Finish activity on back click
+                    finish()
                 }
             }
         }
@@ -80,8 +74,14 @@ fun SettingsContent(interFamily: FontFamily, modifier: Modifier = Modifier) {
             .padding(16.dp)
     ) {
         SettingsSection(title = stringResource(R.string.account), interFamily = interFamily) {
-            SettingsItem(text = stringResource(R.string.account_management), onClick = { /* TODO */ }, interFamily = interFamily)
-            SettingsItem(text = stringResource(R.string.select_language), onClick = { /* TODO */ }, interFamily = interFamily)
+            SettingsItem(text = stringResource(R.string.account_management), onClick = {
+                val intent = Intent(context, AccountManagementActivity::class.java)
+                context.startActivity(intent)
+            }, interFamily = interFamily)
+            SettingsItem(text = stringResource(R.string.select_language), onClick = {
+                val intent = Intent(context, LanguageSelectionActivity::class.java)
+                context.startActivity(intent)
+            }, interFamily = interFamily)
             DarkModeToggle(interFamily = interFamily)
         }
 

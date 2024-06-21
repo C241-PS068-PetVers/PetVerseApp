@@ -53,4 +53,26 @@
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="log_out">Log Out</string>
+    <string name="title_activity_account_management">Account Management</string>
+    <string name="change_email">Change Email</string>
+    <string name="change_password">Change Password</string>
+    <string name="title_activity_language_selection">LanguageSelectionActivity</string>
+    <string name="change_profile_picture">Change profile picture</string>
+    <string name="update">Update</string>
+    <string name="close">Close</string>
+    <string name="capture_image">Capture Image</string>
+    <string name="pick_image">Pick Image</string>
+    <string name="detect">Detect</string>
+    <string name="retry">Retry</string>
+    <string name="back_to_home">Back to Home</string>
+    <string name="change_picture">Change picture</string>
+    <string name="upload_picture">Upload picture</string>
+    <string name="no_image_selected">No image selected</string>
+    <string name="show_as">Show as</string>
+    <string name="select_category">Select Category</string>
+    <string name="post">Post</string>
+    <string name="adoption">Adoption</string>
+    <string name="description">Description</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="post_button">Post</string>
 </resources>

@@ -2,8 +2,10 @@ package com.capstone.petverse.ui.activity
 
 import android.app.Application
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -35,6 +37,9 @@ import com.capstone.petverse.R
 import com.capstone.petverse.ui.theme.PetVerseTheme
 import com.capstone.petverse.ui.viewmodel.EditProfileViewModel
 import com.capstone.petverse.ui.viewmodel.ViewModelFactory
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(navController: NavController) {
     val context = LocalContext.current.applicationContext as Application
@@ -48,8 +53,12 @@ fun EditProfileScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = stringResource(id = R.string.edit_profile),
-                onBackClick = { navController.navigateUp() }
+                title = { Text(stringResource(id = R.string.edit_profile)) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
         },
         content = { paddingValues ->
@@ -63,6 +72,7 @@ fun EditProfileScreen(navController: NavController) {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditProfileContent(
     modifier: Modifier = Modifier,
@@ -92,7 +102,7 @@ fun EditProfileContent(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Change profile picture",
+            text = stringResource(id = R.string.change_profile_picture),
             color = colorResource(id = R.color.colorPrimary),
             modifier = Modifier.clickable { onChangeProfilePictureClick() }
         )
@@ -167,11 +177,10 @@ fun EditProfileContent(
             shape = RoundedCornerShape(8.dp)
         ) {
             Text(
-                text = "Update",
+                text = stringResource(id = R.string.update),
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
         }
     }
 }
-

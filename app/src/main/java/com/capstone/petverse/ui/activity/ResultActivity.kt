@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -75,7 +76,7 @@ fun ResultActivity(navController: NavHostController? = null, viewModel: ResultVi
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
-                        Text(text = "Coba Lagi")
+                        Text(text = stringResource(R.string.retry))
                     }
                 } else {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -85,7 +86,7 @@ fun ResultActivity(navController: NavHostController? = null, viewModel: ResultVi
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
-                        Text(text = "Back to Home")
+                        Text(text = stringResource(R.string.back_to_home))
                     }
                 }
             }
@@ -106,7 +107,7 @@ fun ImagePlaceholderComponent(imageUri: Uri?) {
         )
     } else {
         Image(
-            painter = painterResource(id = R.drawable.wf_mage_placeholder),
+            painter = painterResource(id = R.drawable.wf_image_placeholder),
             contentDescription = null,
             modifier = Modifier
                 .size(300.dp)
