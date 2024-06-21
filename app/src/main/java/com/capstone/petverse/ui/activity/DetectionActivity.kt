@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
@@ -121,7 +122,7 @@ fun ImagePlaceholderComponent(
             )
         } else {
             Image(
-                painter = painterResource(id = R.drawable.wf_mage_placeholder),
+                painter = painterResource(id = R.drawable.wf_image_placeholder),
                 contentDescription = null,
                 modifier = Modifier
                     .size(300.dp)
@@ -132,7 +133,7 @@ fun ImagePlaceholderComponent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = onDetectClick, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF28705))) {
-            Text(text = "Detect")
+            Text(text = stringResource(id = R.string.detect))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -143,15 +144,14 @@ fun ImagePlaceholderComponent(
             horizontalArrangement = Arrangement.Center
         ) {
             Button(onClick = onCaptureClick) {
-                Text(text = "Capture Image")
+                Text(text = stringResource(id = R.string.capture_image))
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Button(onClick = onPickClick) {
-                Text(text = "Pick Image")
+                Text(text = stringResource(id = R.string.pick_image))
             }
         }
     }
 }
-

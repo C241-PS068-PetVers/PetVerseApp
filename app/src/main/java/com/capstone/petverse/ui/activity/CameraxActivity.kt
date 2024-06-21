@@ -20,10 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.capstone.petverse.R
 import com.capstone.petverse.ui.viewmodel.CameraxViewModel
 
 @Composable
@@ -65,7 +67,7 @@ fun CameraPreviewScreen(navController: NavHostController) {
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp)) {
-            Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = Color.White)
+            Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(id = R.string.close), tint = Color.White)
         }
 
         Row(
@@ -78,7 +80,7 @@ fun CameraPreviewScreen(navController: NavHostController) {
                     viewModel.captureImage(it, context)
                 }
             }) {
-                Text(text = "Capture Image")
+                Text(text = stringResource(id = R.string.capture_image))
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -86,9 +88,8 @@ fun CameraPreviewScreen(navController: NavHostController) {
             Button(onClick = {
                 imagePickerLauncher.launch("image/*")
             }) {
-                Text(text = "Pick Image")
+                Text(text = stringResource(id = R.string.pick_image))
             }
         }
     }
 }
-

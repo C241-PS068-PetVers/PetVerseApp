@@ -3,6 +3,8 @@ package com.capstone.petverse.ui.activity
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,12 +18,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.launch
 import com.capstone.petverse.R
 import com.capstone.petverse.ui.viewmodel.UploadPostViewModel
@@ -65,19 +66,19 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
                 )
             }
             Text(
-                text = "Change picture",
+                text = stringResource(R.string.change_picture),
                 color = Color(0xFFFFA726), // Orange color
                 modifier = Modifier
                     .clickable { launcher.launch("image/*") }
             )
         } ?: run {
             Text(
-                text = "Upload picture",
+                text = stringResource(R.string.upload_picture),
                 color = Color(0xFFFFA726), // Orange color
                 modifier = Modifier
                     .clickable { launcher.launch("image/*") }
             )
-            Text(text = "No image selected", modifier = Modifier.padding(top = 16.dp))
+            Text(text = stringResource(R.string.no_image_selected), modifier = Modifier.padding(top = 16.dp))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -90,7 +91,7 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Show as",
+                text = stringResource(R.string.show_as),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -104,7 +105,7 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
                     modifier = Modifier.background(Color.White)
                 ) {
                     Text(
-                        text = if (selectedCategory.isEmpty()) "Select Category" else selectedCategory,
+                        text = if (selectedCategory.isEmpty()) stringResource(R.string.select_category) else selectedCategory,
                         color = if (selectedCategory.isEmpty()) Color.Gray else Color.Black
                     )
                 }
@@ -114,7 +115,7 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
                     onDismissRequest = { expanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Post") },
+                        text = { Text(stringResource(R.string.post)) },
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.setSelectedCategory("post")
@@ -123,7 +124,7 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Adoption") },
+                        text = { Text(stringResource(R.string.adoption)) },
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.setSelectedCategory("adoption")
@@ -141,7 +142,7 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
         TextField(
             value = description,
             onValueChange = { viewModel.setDescription(it) },
-            label = { Text("Description") },
+            label = { Text(stringResource(R.string.description)) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -151,7 +152,7 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
             TextField(
                 value = phoneNumber,
                 onValueChange = { viewModel.setPhoneNumber(it) },
-                label = { Text("Phone Number") },
+                label = { Text(stringResource(R.string.phone_number)) },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -172,7 +173,7 @@ fun UploadPostScreen(navController: NavController, viewModel: UploadPostViewMode
             shape = RoundedCornerShape(8.dp)
         ) {
             Text(
-                text = "Post",
+                text = stringResource(R.string.post_button),
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold

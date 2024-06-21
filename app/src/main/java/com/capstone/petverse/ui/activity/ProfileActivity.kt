@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -127,7 +128,7 @@ fun BodyContent(
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = "Edit Profile",
+                text = stringResource(id = R.string.edit_profile),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -281,7 +282,6 @@ fun PostGrid(posts: List<PostUser>, navController: NavController, profileViewMod
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
