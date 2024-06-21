@@ -113,10 +113,11 @@ class UserRepository private constructor(
                     id = postItemLike?.id ?: "",
                     imageUrl = postItemLike?.imageUrl ?: "",
                     description = postItemLike?.description ?: "",
-                    authorName = postItemLike?.authorName ?: "",
-                    authorProfilePicture = postItemLike?.authorProfilePicture,
+                    username = postItemLike?.username ?: "",
+                    profilePicture = postItemLike?.profilePicture ?: "",
                     likes = postItemLike?.likes?.filterNotNull() ?: emptyList(),
                     category = postItemLike?.category ?: "",
+                    email = postItemLike?.email ?: "",
                     phoneNumber = postItemLike?.phoneNumber
                 )
             } ?: emptyList()

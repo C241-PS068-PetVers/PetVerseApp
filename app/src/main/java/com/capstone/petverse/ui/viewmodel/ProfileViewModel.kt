@@ -49,26 +49,10 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
         }
     }
 
-    fun fetchPostsByCategory(category: String, token: String) {
-        viewModelScope.launch {
-            Log.d("ProfileViewModel", "Fetching posts for category: $category with token: $token")
-            val response = userRepository.getPostsByCategory(token, category)
-            if (response.isSuccessful) {
-                val posts = response.body()
-                    ?.map { mapPostResponseToPostUser(it) }
-                    ?.filter { it.authorName == _userProfile.value?.username } ?: emptyList()
-                _posts.value = posts
-                Log.d("ProfileViewModel", "Fetched ${_posts.value.size} posts")
-            } else {
-                Log.e("ProfileViewModel", "Failed to fetch posts: ${response.errorBody()?.string()}")
-            }
-        }
-    }
-
     private fun updatePostsWithNewProfilePicture(newProfilePictureUrl: String) {
         _posts.value = _posts.value.map { post ->
-            if (post.authorName == _userProfile.value?.username) {
-                post.copy(authorProfilePicture = newProfilePictureUrl)
+            if (post.username == _userProfile.value?.username) {
+                post.copy(profilePicture = newProfilePictureUrl)
             } else {
                 post
             }
@@ -78,15 +62,32 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
     private fun mapPostResponseToPostUser(postResponse: PostResponse): PostUser {
         return PostUser(
             id = postResponse.id ?: "",
-            authorName = postResponse.authorName ?: "",
+            username = postResponse.username ?: "",
+            email = postResponse.email ?: "",
             imageUrl = postResponse.imageUrl ?: "",
             description = postResponse.description ?: "",
             category = postResponse.category ?: "",
             likes = postResponse.likes?.filterNotNull() ?: emptyList(),
             commentsCount = 0,
             phoneNumber = postResponse.phoneNumber,
-            authorProfilePicture = postResponse.authorProfilePicture
+            profilePicture = postResponse.profilePicture ?: ""
         )
+    }
+
+    fun fetchPostsByCategory(category: String, token: String) {
+        viewModelScope.launch {
+            Log.d("ProfileViewModel", "Fetching posts for category: $category with token: $token")
+            val response = userRepository.getPostsByCategory(token, category)
+            if (response.isSuccessful) {
+                val posts = response.body()
+                    ?.map { mapPostResponseToPostUser(it) }
+                    ?.filter { it.email == _userProfile.value?.email } ?: emptyList()
+                _posts.value = posts
+                Log.d("ProfileViewModel", "Fetched ${_posts.value.size} posts")
+            } else {
+                Log.e("ProfileViewModel", "Failed to fetch posts: ${response.errorBody()?.string()}")
+            }
+        }
     }
 
     fun likePost(postId: String) {
@@ -126,3 +127,4 @@ class ProfileViewModel(private val userRepository: UserRepository) : ViewModel()
         }
     }
 }
+

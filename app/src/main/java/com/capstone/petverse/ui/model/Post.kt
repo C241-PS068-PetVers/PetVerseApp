@@ -17,14 +17,15 @@ package com.capstone.petverse.ui.model
 
 data class PostUser(
     val id: String,
-    val authorName: String,
+    val username: String,
+    val email: String,
     val imageUrl: String,
     val description: String,
     val category: String,
     val likes: List<String> = emptyList(),
     val commentsCount: Int = 0,
     val phoneNumber: String? = null,
-    val authorProfilePicture: String? = null
+    val profilePicture: String
 )
 
 //val dummyMenu = listOf(

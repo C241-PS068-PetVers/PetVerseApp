@@ -1,3 +1,4 @@
+// SignupActivity.kt
 package com.capstone.petverse.ui.activity
 
 import android.os.Bundle
@@ -64,7 +65,6 @@ class SignupActivity : ComponentActivity() {
 
     @Composable
     fun PetverseAppSignup() {
-//        val context = LocalContext.current
         val factory = ViewModelFactory.getInstance(application)
         val viewModel: SignupViewModel = viewModel(factory = factory)
         Surface(
@@ -85,11 +85,11 @@ class SignupActivity : ComponentActivity() {
         val email by viewModel.email.observeAsState("")
         val password by viewModel.password.observeAsState("")
         val isPasswordVisible by viewModel.isPasswordVisible.observeAsState(false)
+        val error by viewModel.error.observeAsState()
         val context = LocalContext.current
         val scrollState = rememberScrollState()
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-
 
         val addIcon = rememberAdd()
 
@@ -233,6 +233,14 @@ class SignupActivity : ComponentActivity() {
                         )
 
                         Spacer(modifier = Modifier.height(if (isLandscape) 30.dp else 38.dp))
+
+                        error?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red,
+                                modifier = Modifier.padding(bottom = 10.dp)
+                            )
+                        }
 
                         Column(
                             modifier = Modifier.fillMaxWidth(),

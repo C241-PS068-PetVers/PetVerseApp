@@ -113,16 +113,18 @@ class UploadPostViewModel(application: Application, private val userRepository: 
         Log.d("UploadPostViewModel", "Mapping post: $post")
         return PostUser(
             id = post.id ?: post.hashCode().toString(),
-            authorName = post.authorName ?: "Unknown",
+            username = post.username ?: "Unknown",
+            email = post.email ?: "",
             imageUrl = post.imageUrl ?: "",
             description = post.description ?: "",
             category = post.category ?: "",
             likes = post.likes?.map { it ?: "" } ?: emptyList(),
             commentsCount = 0,
             phoneNumber = post.phoneNumber,
-            authorProfilePicture = post.authorProfilePicture
+            profilePicture = post.profilePicture ?: ""
         )
     }
+
 
     fun likePost(postId: String) {
         viewModelScope.launch {

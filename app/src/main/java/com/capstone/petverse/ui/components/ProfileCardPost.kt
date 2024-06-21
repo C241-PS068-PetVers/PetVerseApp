@@ -63,7 +63,7 @@ fun ProfileCardPost(
     val painterProfile: Painter = if (isInPreview) {
         painterResource(id = R.drawable.account_circle_24)
     } else {
-        val profilePictureUrl = post.authorProfilePicture ?: R.drawable.account_circle_24
+        val profilePictureUrl = post.profilePicture ?: R.drawable.account_circle_24
         rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(profilePictureUrl)
@@ -112,7 +112,7 @@ fun ProfileCardPost(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = post.authorName,
+                    text = post.username,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )

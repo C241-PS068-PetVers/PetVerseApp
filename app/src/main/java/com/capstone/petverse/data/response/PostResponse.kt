@@ -12,8 +12,11 @@ data class PostResponse(
 	@SerializedName("createdAt")
 	val createdAt: CreatedAt? = null,
 
-	@SerializedName("authorName")
-	val authorName: String? = null,
+	@SerializedName("username")
+	val username: String? = null,
+
+	@SerializedName("email")
+	val email: String? = null,
 
 	@SerializedName("imageUrl")
 	val imageUrl: String? = null,
@@ -27,8 +30,8 @@ data class PostResponse(
 	@SerializedName("likes")
 	val likes: List<String?>? = null,
 
-	@SerializedName("authorProfilePicture")
-	val authorProfilePicture: String? = null
+	@SerializedName("profilePicture")
+	val profilePicture: String? = null
 )
 
 data class CreatedAt(
@@ -38,4 +41,3 @@ data class CreatedAt(
 	@SerializedName("_nanoseconds")
 	val nanoseconds: Int? = null
 )
-

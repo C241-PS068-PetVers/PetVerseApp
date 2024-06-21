@@ -30,6 +30,9 @@ class SignupViewModel(private val userRepository: UserRepository) : ViewModel() 
     private val _isPasswordVisible = MutableLiveData<Boolean>()
     val isPasswordVisible: LiveData<Boolean> get() = _isPasswordVisible
 
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> get() = _error
+
     init {
         _isPasswordVisible.value = false
     }
@@ -75,6 +78,16 @@ class SignupViewModel(private val userRepository: UserRepository) : ViewModel() 
         Log.e("SignupInput", "Email: $emailValue, Password: $passwordValue, Name: $nameValue, Username: $usernameValue")
 
         if (emailValue.isNotEmpty() && passwordValue.isNotEmpty()) {
+            if (!isPasswordValid(passwordValue)) {
+                _error.value = "Password must be at least 7 characters long and contain at least one digit"
+                return
+            }
+            if (!isUsernameValid(usernameValue)) {
+                _error.value = "Username cannot contain spaces"
+                return
+            }
+            _error.value = null
+
             viewModelScope.launch {
                 try {
                     val response = userRepository.registerUser(nameValue, usernameValue, emailValue, passwordValue)
@@ -84,16 +97,24 @@ class SignupViewModel(private val userRepository: UserRepository) : ViewModel() 
                     } else {
                         val errorBody = response.errorBody()?.string()
                         Log.e("SignupError", "Error: $errorBody")
-                        Toast.makeText(context, "Sign Up Failed: ${response.message()} - $errorBody", Toast.LENGTH_SHORT).show()
+                        _error.value = "Sign Up Failed: ${response.message()} - $errorBody"
                     }
                 } catch (e: Exception) {
                     Log.e("SignupError", "Exception: ${e.message}")
-                    Toast.makeText(context, "Sign Up Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    _error.value = "Sign Up Failed: ${e.message}"
                 }
             }
         } else {
-            Toast.makeText(context, "Email and Password cannot be empty", Toast.LENGTH_SHORT).show()
+            _error.value = "Email and Password cannot be empty"
         }
+    }
+
+    private fun isPasswordValid(password: String): Boolean {
+        return password.length >= 7 && password.any { it.isDigit() }
+    }
+
+    private fun isUsernameValid(username: String): Boolean {
+        return !username.contains(" ")
     }
 
     fun navigateToLogin(context: Context) {
